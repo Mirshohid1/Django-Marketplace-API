@@ -1,3 +1,36 @@
+from django.contrib.auth.models import AbstractBaseUser, PermissionsMixin
 from django.db import models
+from .managers import UserManager
 
-# Create your models here.
+
+class User(AbstractBaseUser, PermissionsMixin):
+    username = models.CharField(max_length=155, unique=True)
+    email = models.EmailField(max_length=155, unique=True)
+    first_name = models.CharField(max_length=155)
+    last_name = models.CharField(max_length=155)
+    is_staff = models.BooleanField(default=False)
+    is_active = models.BooleanField(default=True)
+    data_joined = models.DateTimeField(auto_now_add=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    USERNAME_FIELD = 'email'
+    REQUIRED_FIELDS = ['username']
+    objects = UserManager()
+
+    def save(self, *args, **kwargs):
+        if self.first_name:
+            self.first_name = self.first_name.strip()
+        if self.last_name:
+            self.last_name = self.last_name.strip()
+
+        super().save(*args, **kwargs)
+
+    def get_full_name(self):
+        return f"{self.first_name} {self.last_name}"
+
+    def get_short_name(self):
+        return self.first_name
+
+    def __str__(self):
+        return self.email
