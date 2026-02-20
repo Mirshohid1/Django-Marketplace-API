@@ -10,7 +10,6 @@ class User(AbstractBaseUser, PermissionsMixin):
     last_name = models.CharField(max_length=155)
     is_staff = models.BooleanField(default=False)
     is_active = models.BooleanField(default=True)
-    data_joined = models.DateTimeField(auto_now_add=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
@@ -18,11 +17,15 @@ class User(AbstractBaseUser, PermissionsMixin):
     REQUIRED_FIELDS = ['username']
     objects = UserManager()
 
-    def save(self, *args, **kwargs):
+    def clean(self):
+        if self.email:
+            self.email = self.email.strip().lower()
         if self.first_name:
             self.first_name = self.first_name.strip()
-        if self.last_name:
-            self.last_name = self.last_name.strip()
+
+    def save(self, *args, **kwargs):
+        self.full_clean()
+        super().save(*args, **kwargs)
 
         super().save(*args, **kwargs)
 
