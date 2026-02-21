@@ -4,10 +4,10 @@ from .managers import UserManager
 
 
 class User(AbstractBaseUser, PermissionsMixin):
-    username = models.CharField(max_length=155, unique=True)
+    username = models.CharField(max_length=155, unique=True, blank=True)
     email = models.EmailField(max_length=155, unique=True)
-    first_name = models.CharField(max_length=155)
-    last_name = models.CharField(max_length=155)
+    first_name = models.CharField(max_length=155, blank=True)
+    last_name = models.CharField(max_length=155, blank=True)
     is_staff = models.BooleanField(default=False)
     is_active = models.BooleanField(default=True)
     created_at = models.DateTimeField(auto_now_add=True)
