@@ -1,6 +1,8 @@
 from rest_framework import serializers
+from rest_framework_simplejwt.tokens import RefreshToken
 from django.db import transaction
 from django.core.exceptions import ValidationError as DjangoValidationError
+from django.db.models import Q
 from .service.validators import PasswordValidationService
 from .models import User
 
@@ -48,3 +50,25 @@ class RegisterSerializer(serializers.ModelSerializer):
         user = User.objects.create_user(**validated_data)
         return user
 
+
+class LoginSerializer(serializers.Serializer):
+    login = serializers.CharField(write_only=True)
+    password = serializers.CharField(write_only=True)
+    access = serializers.CharField(read_only=True)
+    refresh = serializers.CharField(read_only=True)
+
+    def validate(self, attrs):
+        login = attrs.get('login')
+        password = attrs.get('password')
+
+        user = User.objects.filter(Q(email=login) | Q(username=login)).first()
+        if not user:
+            raise serializers.ValidationError("There is no user with this username or email.")
+
+        if not user.check_password(password):
+            raise serializers.ValidationError("Invalid password.")
+
+        refresh = RefreshToken.for_user(user)
+        attrs['refresh'] = str(refresh)
+        attrs['access'] = str(refresh.access_token)
+        return attrs
