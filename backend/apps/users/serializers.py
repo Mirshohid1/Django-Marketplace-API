@@ -1,5 +1,7 @@
 from rest_framework import serializers
 from django.db import transaction
+from django.core.exceptions import ValidationError as DjangoValidationError
+from .service.validators import PasswordValidationService
 from .models import User
 
 
@@ -11,16 +13,30 @@ class RegisterSerializer(serializers.ModelSerializer):
         model = User
         fields = (
             'first_name', 'last_name',
-            'username', 'email', 'password'
+            'username', 'email',
+            'password', 'password_confirm',
         )
 
-    def validate_password(self, attrs):
+    def validate(self, attrs):
         if attrs['password'] != attrs['password_confirm']:
-            raise serializers.ValidationError('Passwords must match')
+            raise serializers.ValidationError({'password': 'Passwords must match'})
 
-        if User.objects.filter(email=attrs['email']).exists():
+        user_attrs = {
+            'username': attrs.get('username'),
+            'email': attrs.get('email'),
+            'first_name': attrs.get('first_name'),
+            'last_name': attrs.get('last_name'),
+        }
+
+        try:
+            PasswordValidationService.validate(attrs['password'], **user_attrs)
+        except DjangoValidationError as e:
+            raise serializers.ValidationError({'password': list(e.messages)})
+
+        if User.objects.filter(email=user_attrs['email']).exists():
             raise serializers.ValidationError('Email already registered')
-        elif User.objects.filter(username=attrs['username']).exists():
+
+        if User.objects.filter(username=user_attrs['username']).exists():
             raise serializers.ValidationError('Username already registered')
 
         return attrs
@@ -29,6 +45,6 @@ class RegisterSerializer(serializers.ModelSerializer):
     def create(self, validated_data):
         validated_data.pop('password_confirm')
 
-        user = User.objects.create(**validated_data)
+        user = User.objects.create_user(**validated_data)
         return user
 
