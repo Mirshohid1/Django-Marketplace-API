@@ -36,7 +36,7 @@ class RegisterSerializer(serializers.ModelSerializer):
         if User.objects.filter(email=user_attrs['email']).exists():
             raise serializers.ValidationError('Email already registered')
 
-        if User.objects.filter(username=user_attrs['username']).exists():
+        if user_attrs['username'] and User.objects.filter(username=user_attrs['username']).exists():
             raise serializers.ValidationError('Username already registered')
 
         return attrs
