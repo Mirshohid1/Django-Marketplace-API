@@ -1,10 +1,13 @@
 from django.contrib.auth.models import AbstractBaseUser, PermissionsMixin
 from django.db import models
+from django.utils.text import slugify
 from .managers import UserManager
+
+import uuid
 
 
 class User(AbstractBaseUser, PermissionsMixin):
-    username = models.CharField(max_length=155, unique=True, blank=True)
+    username = models.CharField(max_length=155, unique=True, blank=True, null=True)
     email = models.EmailField(max_length=155, unique=True)
     first_name = models.CharField(max_length=155, blank=True)
     last_name = models.CharField(max_length=155, blank=True)
@@ -25,6 +28,11 @@ class User(AbstractBaseUser, PermissionsMixin):
 
     def save(self, *args, **kwargs):
         self.full_clean()
+
+        if not self.username:
+            unique_id = str(uuid.uuid4())[:8]
+            self.username = slugify(f"user-{unique_id}")
+
         super().save(*args, **kwargs)
 
     def get_full_name(self):
