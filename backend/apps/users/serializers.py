@@ -72,3 +72,24 @@ class LoginSerializer(serializers.Serializer):
         attrs['refresh'] = str(refresh)
         attrs['access'] = str(refresh.access_token)
         return attrs
+
+
+class UserSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = User
+        fields = (
+            'first_name', 'last_name',
+            'username', 'email',
+        )
+
+
+class UserOutPutSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = User
+        fields = (
+            'id',
+            'first_name', 'last_name',
+            'username', 'email',
+            'is_active', 'is_staff',
+        )
+        read_only_fields = fields
