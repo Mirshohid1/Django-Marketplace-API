@@ -46,7 +46,7 @@ def test_unique_email():
         password='1234',
     )
 
-    with pytest.raises(IntegrityError):
+    with pytest.raises(ValidationError):
         User.objects.create_user(
             email='test4@example.com',
             password='1234',
