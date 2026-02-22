@@ -26,3 +26,16 @@ def test_invalid_username():
         user.save()
 
 
+@pytest.mark.django_db
+def test_normalize_fields():
+    user = User.objects.create_user(
+        email='  test3@example.com',
+        first_name='  Test  .B   ',
+        last_name='Test ',
+        password='test1234',
+    )
+    assert user.email == "test3@example.com"
+    assert user.first_name == "Test .B"
+    assert user.last_name == "Test"
+
+
