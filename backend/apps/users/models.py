@@ -17,14 +17,17 @@ class User(AbstractBaseUser, PermissionsMixin):
     updated_at = models.DateTimeField(auto_now=True)
 
     USERNAME_FIELD = 'email'
-    REQUIRED_FIELDS = ['username']
     objects = UserManager()
 
     def clean(self):
-        if self.email:
-            self.email = self.email.strip().lower()
         if self.first_name:
             self.first_name = self.first_name.strip()
+        if self.last_name:
+            self.last_name = self.last_name.strip()
+        if self.email:
+            self.email = self.email.strip().lower()
+        if self.username:
+            self.username = self.username.strip()
 
     def save(self, *args, **kwargs):
         self.full_clean()
