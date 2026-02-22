@@ -1,5 +1,6 @@
 from django.contrib.auth.models import AbstractBaseUser, PermissionsMixin
 from django.db import models
+from django.core.validators import RegexValidator
 from django.utils.text import slugify
 from .managers import UserManager
 
@@ -7,7 +8,16 @@ import uuid
 
 
 class User(AbstractBaseUser, PermissionsMixin):
-    username = models.CharField(max_length=155, unique=True, blank=True, null=True)
+    username = models.CharField(
+        max_length=155,
+        unique=True,
+        validators=[
+            RegexValidator(
+                regex=r'^[a-zA-Z0-9._-]+$',
+                message='Username may contain only letters, numbers, dots, underscores and hyphens.'
+            )
+        ], blank=True, null=False
+    )
     email = models.EmailField(max_length=155, unique=True)
     first_name = models.CharField(max_length=155, blank=True)
     last_name = models.CharField(max_length=155, blank=True)
@@ -20,14 +30,14 @@ class User(AbstractBaseUser, PermissionsMixin):
     objects = UserManager()
 
     def clean(self):
+        super().clean()
+
         if self.first_name:
-            self.first_name = self.first_name.strip()
+            self.first_name = " ".join(self.first_name.split())
         if self.last_name:
-            self.last_name = self.last_name.strip()
+            self.last_name = " ".join(self.last_name.split())
         if self.email:
             self.email = self.email.strip().lower()
-        if self.username:
-            self.username = self.username.strip()
 
     def save(self, *args, **kwargs):
         self.full_clean()
