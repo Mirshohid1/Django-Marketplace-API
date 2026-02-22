@@ -39,3 +39,15 @@ def test_normalize_fields():
     assert user.last_name == "Test"
 
 
+@pytest.mark.django_db
+def test_unique_email():
+    User.objects.create_user(
+        email='test4@example.com',
+        password='1234',
+    )
+
+    with pytest.raises(IntegrityError):
+        User.objects.create_user(
+            email='test4@example.com',
+            password='1234',
+        )
