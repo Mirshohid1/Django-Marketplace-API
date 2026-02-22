@@ -25,7 +25,7 @@ class LoginAPIView(GenericAPIView):
         }, status=status.HTTP_200_OK)
 
 
-class MeView(RetrieveUpdateAPIView):
+class MeAPIView(RetrieveUpdateAPIView):
     permission_classes = [IsAuthenticated]
 
     def get_serializer_class(self):
