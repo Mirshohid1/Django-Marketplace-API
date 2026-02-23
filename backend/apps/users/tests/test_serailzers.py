@@ -4,7 +4,7 @@ from ..models import User
 from ..serializers import RegisterSerializer
 
 
-class TestRegisterSerializer():
+class TestRegisterSerializer:
     @pytest.fixture
     def valid_data(self):
         return {
