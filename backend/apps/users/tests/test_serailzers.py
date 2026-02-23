@@ -46,6 +46,7 @@ class TestRegisterSerializer():
 
         serializer = RegisterSerializer(data=data)
 
+        assert not serializer.is_valid()
         assert 'password' in serializer.errors
 
     @pytest.mark.django_db
