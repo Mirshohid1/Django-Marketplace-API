@@ -35,27 +35,3 @@ class MeAPIView(RetrieveUpdateAPIView):
 
     def get_object(self):
         return self.request.user
-
-    def put(self, request, *args, **kwargs):
-        user = request.user
-        if not user.username:
-            import uuid
-            user.username = f"user{uuid.uuid4().hex[:8]}"
-            user.save(update_fields=['username'])
-
-        serializer = self.get_serializer(instance=request.user, data=request.data)
-        serializer.is_valid(raise_exception=True)
-        serializer.save()
-        return Response(serializer.data, status=status.HTTP_200_OK)
-
-    def patch(self, request, *args, **kwargs):
-        user = request.user
-        if not user.username:
-            import uuid
-            user.username = f"user{uuid.uuid4().hex[:8]}"
-            user.save(update_fields=['username'])
-
-        serializer = self.get_serializer(instance=request.user, data=request.data, partial=True)
-        serializer.is_valid(raise_exception=True)
-        serializer.save()
-        return Response(serializer.data, status=status.HTTP_200_OK)
