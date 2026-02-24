@@ -29,6 +29,10 @@ class User(AbstractBaseUser, PermissionsMixin):
     USERNAME_FIELD = 'email'
     objects = UserManager()
 
+    def generate_username(self):
+        unique_id = str(uuid.uuid4())[:8]
+        self.username = slugify(f"user-{unique_id}")
+
     def clean(self):
         super().clean()
 
@@ -43,8 +47,7 @@ class User(AbstractBaseUser, PermissionsMixin):
         self.full_clean()
 
         if not self.username:
-            unique_id = str(uuid.uuid4())[:8]
-            self.username = slugify(f"user-{unique_id}")
+            self.generate_username()
 
         super().save(*args, **kwargs)
 
