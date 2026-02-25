@@ -62,16 +62,14 @@ class LoginSerializer(serializers.Serializer):
         password = attrs.get('password')
 
         user = User.objects.filter(Q(email=login) | Q(username=login)).first()
-        if not user:
-            raise serializers.ValidationError("Invalid credentials.")
-
-        if not user.check_password(password):
+        if not user or not user.check_password(password):
             raise serializers.ValidationError("Invalid credentials.")
 
         refresh = RefreshToken.for_user(user)
-        attrs['refresh'] = str(refresh)
-        attrs['access'] = str(refresh.access_token)
-        return attrs
+        return {
+            'access': str(refresh.access_token),
+            'refresh': str(refresh),
+        }
 
 
 class UserSerializer(serializers.ModelSerializer):
