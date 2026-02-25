@@ -79,29 +79,15 @@ class TestRegisterSerializer:
 
 @pytest.mark.django_db
 class TestLoginSerializer:
-    @pytest.mark.parametrize("login", [
-        'not_existing',
-        'not_existing@example.com'
+    @pytest.mark.parametrize("login, password", [
+        ('existing', 'Strong_Password1234'),
+        ('existing@example.com', 'Strong_Password1234'),
     ]
     )
-    def test_wrong_login(self, login):
+    def test_success_login(self, login, password, user):
         serializer = LoginSerializer(data={
             'login': login,
-            'password': 'Strong_Password1234',
-        })
-
-        assert not serializer.is_valid()
-        assert 'non_field_errors' in serializer.errors
-
-    @pytest.mark.parametrize("login", [
-        'existing',
-        'existing@example.com',
-    ]
-    )
-    def test_success_login(self, login, user):
-        serializer = LoginSerializer(data={
-            'login': login,
-            'password': 'Strong_Password1234',
+            'password': password,
         })
 
         assert serializer.is_valid()
@@ -109,15 +95,17 @@ class TestLoginSerializer:
         assert 'access' in serializer.validated_data
         assert 'refresh' in serializer.validated_data
 
-    @pytest.mark.parametrize("login", [
-        'existing',
-        'existing@example.com'
+    @pytest.mark.parametrize("login, password", [
+        ('not_existing', 'Strong_Password1234'),
+        ('not_existing@example.com', 'Strong_Password1234'),
+        ('existing', 'Wrong_Password1234'),
+        ('existing@example.com', 'Wrong_Password1234'),
     ]
     )
-    def test_wrong_password(self, login, user):
+    def test_unsuccess_login(self, login, password, user):
         serializer = LoginSerializer(data={
             'login': login,
-            'password': 'Wrong_Password1234',
+            'password': password,
         })
 
         assert not serializer.is_valid()
