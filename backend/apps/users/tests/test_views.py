@@ -1,5 +1,5 @@
 from django.urls import reverse
-from rest_framework_simplejwt.tokens import AccessToken
+from rest_framework_simplejwt.tokens import AccessToken, RefreshToken
 from ..models import User
 
 import pytest
