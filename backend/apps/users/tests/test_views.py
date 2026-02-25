@@ -87,6 +87,35 @@ class TestLoginAPIView:
 
 
 @pytest.mark.django_db
+class TestLogoutAPIView:
+    def test_logout_unauthorized(self, api_client):
+        url = reverse('logout')
+        response = api_client.post(url)
+        assert response.status_code == 401
+
+    def test_logout_success(self, api_client, user):
+        api_client.force_authenticate(user=user)
+        refresh = str(RefreshToken.for_user(user))
+
+        url = reverse('logout')
+        response = api_client.post(url, {'refresh': refresh})
+
+        assert response.status_code == 204
+
+        from rest_framework_simplejwt.token_blacklist.models import BlacklistedToken, OutstandingToken
+        token = OutstandingToken.objects.get(token=refresh)
+        assert BlacklistedToken.objects.filter(token=token).exists()
+
+    def test_logout_invalid_token(self, api_client, user):
+        api_client.force_authenticate(user=user)
+        url = reverse('logout')
+        response = api_client.post(url, {'refresh': 'wrong_token'})
+
+        assert response.status_code == 400
+        assert 'Invalid token.' in str(response.data)
+
+
+@pytest.mark.django_db
 class TestMeAPIView:
     def test_me_unauthorized(self, api_client):
         url = reverse('me')
