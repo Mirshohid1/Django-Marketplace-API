@@ -83,4 +83,56 @@ class TestLoginAPIView:
 
         assert response.status_code == 400
         assert 'non_field_errors' in response.data
-        assert reponse.data['non_field_errors'][0] == "Invalid credentials."
+        assert response.data['non_field_errors'][0] == "Invalid credentials."
+
+
+@pytest.mark.django_db
+class TestMeAPIView:
+    def test_me_unauthorized(self, api_client):
+        url = reverse('me')
+        response = api_client.get(url)
+
+        assert response.status_code == 401
+
+    def test_me_get_success(self, api_client, user):
+        api_client.force_authenticate(user=user)
+
+        url = reverse('me')
+        response = api_client.get(url)
+
+        assert response.status_code == 200
+        assert response.data['id'] == user.id
+        assert response.data['email'] == user.email
+        assert 'password' not in response.data
+
+    def test_me_update_success(self, api_client, user):
+        api_client.force_authenticate(user=user)
+
+        url = reverse('me')
+        response = api_client.patch(url, {
+            'first_name': 'Updated',
+        })
+
+        assert response.status_code == 200
+
+        user.refresh_from_db()
+        assert user.first_name == 'Updated'
+
+    def test_me_update_fail(self, api_client, user):
+        api_client.force_authenticate(user=user)
+
+        url = reverse('me')
+        response = api_client.patch(url, {
+            'id': 99
+        })
+
+        assert response.status_code == 400
+        assert 'id' in response.data
+
+    def test_me_update_unauthorized(self, api_client, user):
+        url = reverse('me')
+        response = api_client.patch(url, {
+            'first_name': 'Updated',
+        })
+
+        assert response.status_code == 401
