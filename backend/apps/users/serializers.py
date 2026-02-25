@@ -79,6 +79,22 @@ class UserSerializer(serializers.ModelSerializer):
             'first_name', 'last_name',
             'username', 'email',
         )
+        read_only_fields = (
+            'id', 'is_staff', 'is_active', 'is_superuser',
+        )
+
+    def validate(self, attrs):
+        read_only_fields = set(self.Meta.read_only_fields)
+
+        forbidden = read_only_fields & set(self.initial_data.keys())
+
+        if forbidden:
+            raise serializers.ValidationError({
+                field: "This field is read-only."
+                for field in forbidden
+            }) # noqa: S7519 — intentional, custom validation raises ValidationError directly
+
+        return super().validate(attrs)
 
 
 class UserOutPutSerializer(serializers.ModelSerializer):
