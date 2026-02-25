@@ -110,3 +110,4 @@ class TestLoginSerializer:
 
         assert not serializer.is_valid()
         assert 'non_field_errors' in serializer.errors
+        assert serializer.errors['non_field_errors'][0] == "Invalid credentials."

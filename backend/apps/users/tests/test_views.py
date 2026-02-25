@@ -83,3 +83,4 @@ class TestLoginAPIView:
 
         assert response.status_code == 400
         assert 'non_field_errors' in response.data
+        assert reponse.data['non_field_errors'][0] == "Invalid credentials."
