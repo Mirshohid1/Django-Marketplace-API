@@ -63,10 +63,10 @@ class LoginSerializer(serializers.Serializer):
 
         user = User.objects.filter(Q(email=login) | Q(username=login)).first()
         if not user:
-            raise serializers.ValidationError("There is no user with this username or email.")
+            raise serializers.ValidationError("Invalid credentials.")
 
         if not user.check_password(password):
-            raise serializers.ValidationError("Invalid password.")
+            raise serializers.ValidationError("Invalid credentials.")
 
         refresh = RefreshToken.for_user(user)
         attrs['refresh'] = str(refresh)
