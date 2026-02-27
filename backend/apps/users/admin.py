@@ -5,7 +5,7 @@ from .models import User, EmailVerification
 
 class EmailVerificationInline(admin.StackedInline):
     model = EmailVerification
-    readonly_fields = ('token', 'created_at', 'is_expired')
+    readonly_fields = ('token', 'created_at', 'updated_at', 'is_expired')
     verbose_name_plural = "Email Verification"
     can_delete = False
 
@@ -97,12 +97,7 @@ class CustomUserAdmin(UserAdmin):
 
 @admin.register(EmailVerification)
 class EmailVerificationAdmin(admin.ModelAdmin):
-    list_display = ("user", "token", "created_at", "is_used")
-    list_filter = ("is_used", "created_at")
+    list_display = ("user", "token", "created_at", "updated_at")
+    list_filter = ("created_at", "updated_at")
     search_fields = ("user__email", "token")
     readonly_fields = ("token", "created_at")
-    actions = ["mark_as_used"]
-
-    def mark_as_used(self, request, queryset):
-        queryset.update(is_used=True)
-    mark_as_used.short_description = "Mark selected tokens as used"

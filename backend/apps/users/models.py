@@ -82,8 +82,6 @@ class EmailVerification(models.Model):
     updated_at = models.DateTimeField(auto_now=True)
     expires_at = models.DateTimeField()
 
-    is_used = models.BooleanField(default=False)
-
     def save(self, *args, **kwargs):
         if not self.expires_at:
             self.expires_at = timezone.now() + timedelta(minutes=30)
