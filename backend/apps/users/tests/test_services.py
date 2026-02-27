@@ -1,7 +1,13 @@
 import pytest
 from django.core.exceptions import ValidationError
-
+from unittest.mock import patch
+from django.urls import reverse
+from ..models import EmailVerification
 from ..service.validators import PasswordValidationService
+from ..service.email import (
+    create_email_verification,
+    send_email_verification,
+)
 
 
 class TestPasswordValidationService:
@@ -34,4 +40,29 @@ class TestPasswordValidationService:
             )
 
         assert "too similar" in str(exc.value)
+
+
+@pytest.mark.django_db
+class TestEmailVerificationService:
+
+    def test_create_email_verification_deletes_old_and_creates_new(self, user):
+        old_verification = EmailVerification.objects.create(user=user) # call 1
+
+        new_verification = create_email_verification(user) # call 2
+
+        assert EmailVerification.objects.count() == 1 # object count = 1
+        assert new_verification.id != old_verification.id
+
+    @patch("users.service.email.send_mail")
+    def test_send_email_verification_calls_send_mail(self, mock_send_mail, user, rf):
+        verification = EmailVerification.objects.create(user=user)
+
+        request = rf.get("/")
+        send_email_verification(user, verification.token, request)
+
+        assert mock_send_mail.called
+
+        args, kwargs = mock_send_mail.call_args
+
+        assert user.email in args[3]
 

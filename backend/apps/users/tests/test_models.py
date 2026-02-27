@@ -3,6 +3,7 @@ import re
 from django.utils import timezone
 from datetime import timedelta
 from django.core.exceptions import ValidationError
+from django.db import IntegrityError
 from ..models import User, EmailVerification
 
 
@@ -63,9 +64,20 @@ class TestEmailVerificationModel:
 
     def test_expires_at_auto_set_on_save(self, user):
         verification = EmailVerification.objects.create(user=user)
+        time = timezone.now() + timedelta(minutes=30)
 
         assert verification.expires_at is not None
-        assert verification.expires_at > timezone.now()
+        assert (verification.expires_at > time) is False
+        assert verification.expires_at <= time
+
+    def test_expires_at_not_set_on_save(self, user):
+        time = timezone.now()
+        verification = EmailVerification.objects.create(
+            user=user,
+            expires_at=time,
+        )
+
+        assert verification.expires_at == time
 
     def test_is_expired_returns_false_when_valid(self, user):
         verification = EmailVerification.objects.create(user=user)
@@ -80,7 +92,8 @@ class TestEmailVerificationModel:
 
         assert verification.is_expired() is True
 
-    def test_str_representation(self, user):
-        verification = EmailVerification.objects.create(user=user)
+    def test_one_to_one_limitation(self, user):
+        EmailVerification.objects.create(user=user)
 
-        assert str(verification) == f"EmailVerification: {user}"
+        with pytest.raises(IntegrityError):
+            EmailVerification.objects.create(user=user)

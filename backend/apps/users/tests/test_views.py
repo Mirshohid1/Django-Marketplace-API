@@ -1,6 +1,8 @@
 from django.urls import reverse
 from rest_framework_simplejwt.tokens import AccessToken, RefreshToken
-from ..models import User
+from django.utils import timezone
+from datetime import timedelta
+from ..models import User, EmailVerification
 
 import pytest
 
@@ -165,3 +167,81 @@ class TestMeAPIView:
         })
 
         assert response.status_code == 401
+
+
+@pytest.mark.django_db
+class TestVerifyEmailAPIView:
+    def test_email_verification_success(self, api_client, user):
+        verification = EmailVerification.objects.create(user=user)
+
+        url = reverse('verify', kwargs={'token': verification.token})
+        response = api_client.get(url)
+
+        user.refresh_from_db()
+
+        assert response.status_code == 200
+        assert user.is_verified is True
+        assert not EmailVerification.objects.filter(user=user).exists()
+
+    def test_email_invalid_token(self, api_client, user):
+        url = reverse('verify', kwargs={'token': '00000000-0000-0000-0000-000000000000'})
+        response = api_client.get(url)
+
+        assert response.status_code == 400
+
+    def test_email_expired_token(self, api_client, user):
+        verification = EmailVerification.objects.create(user=user)
+        verification.expires_at = timezone.now() - timedelta(minutes=1)
+        verification.save(update_fields=['expires_at'])
+
+        url = reverse('verify', kwargs={'token': verification.token})
+        response = api_client.get(url)
+
+        assert response.status_code == 400
+        assert not EmailVerification.objects.filter(user=user).exists()
+        assert user.is_verified is False
+
+
+@pytest.mark.django_db
+class TestResendVerificationAPIView:
+    def test_resend_verification_success(self, api_client, user):
+        verification = EmailVerification.objects.create(user=user)
+
+        api_client.force_authenticate(user=user)
+        url = reverse('resend_verification')
+        response = api_client.post(url)
+
+        new_verification = EmailVerification.objects.get(user=user)
+
+        assert response.status_code == 200
+        assert verification.id != new_verification.id
+        assert EmailVerification.objects.filter(id=new_verification.id).exists()
+        assert not EmailVerification.objects.filter(id=verification.id).exists()
+
+    def test_resend_verification_verified_user(self, api_client, user):
+        user.is_verified = True
+        user.save(update_fields=['is_verified'])
+
+        api_client.force_authenticate(user=user)
+        url = reverse('resend_verification')
+        response = api_client.post(url)
+
+        assert response.status_code == 400
+
+    def test_resend_verification_unauthorized(self, api_client, user):
+        url = reverse('resend_verification')
+        response = api_client.post(url)
+
+        assert response.status_code == 401
+
+    def test_thorttle(self, api_client, user):
+        api_client.force_authenticate(user=user)
+        url = reverse('resend_verification')
+
+        responses = []
+        for _ in range(10):
+            response = api_client.post(url)
+            responses.append(response)
+
+
+        assert responses[-1].status_code == 429
