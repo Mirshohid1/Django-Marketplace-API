@@ -1,7 +1,9 @@
 from rest_framework.generics import CreateAPIView, GenericAPIView, RetrieveUpdateAPIView
+from rest_framework.views import APIView
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.response import Response
 from rest_framework import status
+from .models import EmailVerification
 
 from .serializers import (
     RegisterSerializer, LoginSerializer, LogoutSerializer,
@@ -49,3 +51,57 @@ class MeAPIView(RetrieveUpdateAPIView):
 
     def get_object(self):
         return self.request.user
+
+
+class VerifyEmailAPIView(APIView):
+
+    authentication_classes = []
+    permission_classes = []
+
+    def get(self, request, token):
+
+        try:
+            verification = EmailVerification.objects.select_related("user").get(token=token)
+        except EmailVerification.DoesNotExist:
+            return Response(
+                {"detail": "Invalid token"},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+
+        if verification.is_expired():
+            verification.delete()
+            return Response(
+                {"detail": "Token expired"},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+
+        user = verification.user
+        user.is_verified = True
+        user.save(update_fields=["is_verified"])
+
+        verification.delete()
+
+        return Response(
+            {"detail": "Email verified"},
+            status=status.HTTP_200_OK
+        )
+
+
+class ResendVerificationAPIView(APIView):
+
+    def post(self, request):
+        user = request.user
+
+        if user.is_email_verified:
+            return Response(
+                {"detail": "Email already verified"},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+
+        verification = create_email_verification(user)
+        send_email_verification(user, verification.token)
+
+        return Response(
+            {"detail": "Verification email sent"},
+            status=status.HTTP_200_OK
+        )
