@@ -20,7 +20,7 @@ class RegisterAPIView(CreateAPIView):
     def perform_create(self, serializer):
         user = serializer.save()
         verification = create_email_verification(user)
-        send_email_verification(user, verification.token)
+        send_email_verification(user, verification.token, self.request)
 
 
 class LoginAPIView(GenericAPIView):
@@ -112,7 +112,7 @@ class ResendVerificationAPIView(APIView):
             )
 
         verification = create_email_verification(user)
-        send_email_verification(user, verification.token)
+        send_email_verification(user, verification.token, request)
 
         return Response(
             {"detail": "Verification email sent"},
