@@ -3,6 +3,8 @@ from rest_framework.views import APIView
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.response import Response
 from rest_framework import status
+from rest_framework.throttling import UserRateThrottle
+from service.email import create_email_verification, send_email_verification
 from .models import EmailVerification
 
 from .serializers import (
@@ -14,6 +16,11 @@ from .serializers import (
 class RegisterAPIView(CreateAPIView):
     serializer_class = RegisterSerializer
     permission_classes = [AllowAny]
+
+    def perform_create(self, serializer):
+        user = serializer.save(user=self.request.user)
+        verification = create_email_verification(user)
+        send_email_verification(user, verification.token)
 
 
 class LoginAPIView(GenericAPIView):
@@ -87,7 +94,13 @@ class VerifyEmailAPIView(APIView):
         )
 
 
+class ResendThrottle(UserRateThrottle):
+    rate = "3/hour"
+
+
 class ResendVerificationAPIView(APIView):
+    permission_classes = [IsAuthenticated]
+    throttle_classes = [ResendThrottle]
 
     def post(self, request):
         user = request.user
