@@ -1,7 +1,7 @@
 from django.db import transaction
 from django.core.mail import send_mail
 from django.conf import settings
-from .models import EmailVerification
+from ..models import EmailVerification
 
 
 @transaction.atomic
@@ -12,7 +12,7 @@ def create_email_verification(user):
 
 def send_email_verification(user, token):
     verification_url = (
-        f"http://localhost:8000/api/auth/verify-email/{token}/"
+        f"http://localhost:8000/api/auth/verify/{token}/"
     )
 
     send_mail(

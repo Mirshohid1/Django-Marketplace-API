@@ -4,7 +4,7 @@ from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.response import Response
 from rest_framework import status
 from rest_framework.throttling import UserRateThrottle
-from service.email import create_email_verification, send_email_verification
+from .service.email import create_email_verification, send_email_verification
 from .models import EmailVerification
 
 from .serializers import (
@@ -18,7 +18,7 @@ class RegisterAPIView(CreateAPIView):
     permission_classes = [AllowAny]
 
     def perform_create(self, serializer):
-        user = serializer.save(user=self.request.user)
+        user = serializer.save()
         verification = create_email_verification(user)
         send_email_verification(user, verification.token)
 
@@ -105,7 +105,7 @@ class ResendVerificationAPIView(APIView):
     def post(self, request):
         user = request.user
 
-        if user.is_email_verified:
+        if user.is_verified:
             return Response(
                 {"detail": "Email already verified"},
                 status=status.HTTP_400_BAD_REQUEST
