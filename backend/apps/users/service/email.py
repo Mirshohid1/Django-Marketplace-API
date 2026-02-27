@@ -13,7 +13,7 @@ def create_email_verification(user):
 
 def send_email_verification(user, token, request):
     relative_url = reverse(
-        "verify-email",  # name из urls.py
+        "verify",  # name из urls.py
         kwargs={"token": token}
     )
 
