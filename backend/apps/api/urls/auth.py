@@ -13,6 +13,6 @@ urlpatterns = [
     path('logout/', LogoutAPIView.as_view(), name='logout'),
     path('refresh/', TokenRefreshView.as_view(), name='token_refresh'),
     path('me/', MeAPIView.as_view(), name='me'),
-    path('verify/<uuid:token>/', VerifyEmailAPIView.as_view(), name='verify-email'),
+    path('verify/<uuid:token>/', VerifyEmailAPIView.as_view(), name='verify'),
     path('resend_verification/', ResendVerificationAPIView.as_view(), name='resend_verification'),
 ]
