@@ -34,6 +34,7 @@ LOCAL_APPS = [
     'api',
     'common',
     'users',
+    'products'
 ]
 
 INSTALLED_APPS = BASE_APPS + THIRD_PARTY_APPS + LOCAL_APPS
