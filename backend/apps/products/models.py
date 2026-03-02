@@ -167,12 +167,12 @@ class Product(models.Model):
             ),
             models.Index(
                 fields=['category', '-created_at'],
-                condition=Q(status=Product.Status.APPROVED, is_deleted=False),
+                condition=Q(status='approved', is_deleted=False),
                 name='idx_product_category'
             ),
             models.Index(
                 fields=['-created_at'],
-                condition=Q(status=Product.Status.APPROVED, is_deleted=False),
+                condition=Q(status='approved', is_deleted=False),
                 name='idx_product_feed'
             ),
             models.Index(fields=['status']),
