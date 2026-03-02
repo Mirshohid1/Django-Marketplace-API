@@ -1,4 +1,5 @@
 from django.db import models
+from .models import Product
 
 
 class ProductQuerySet(models.QuerySet):
