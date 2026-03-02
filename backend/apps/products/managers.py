@@ -1,5 +1,4 @@
 from django.db import models
-from .models import Product
 
 
 class ProductQuerySet(models.QuerySet):
@@ -11,16 +10,16 @@ class ProductQuerySet(models.QuerySet):
         return self.filter(is_deleted=True)
 
     def approved(self):
-        return self.alive().filter(status=Product.Status.APPROVED)
+        return self.alive().filter(status=self.model.Status.APPROVED)
 
     def pending(self):
-        return self.alive().filter(status=Product.Status.PENDING)
+        return self.alive().filter(status=self.model.Status.PENDING)
 
     def draft(self):
-        return self.alive().filter(status=Product.Status.DRAFT)
+        return self.alive().filter(status=self.model.Status.DRAFT)
 
     def archived(self):
-        return self.alive().filter(status=Product.Status.ARCHIVED)
+        return self.alive().filter(status=self.model.Status.ARCHIVED)
 
     def for_feed(self):
         return self.approved().order_by("-created_at")

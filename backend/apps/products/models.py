@@ -85,7 +85,6 @@ class Product(models.Model):
             self.status in {self.Status.DRAFT, self.Status.REJECTED}
         )
 
-    @transaction.atomic
     def approve(self):
         if self.status != self.Status.PENDING:
             raise ValidationError("Only pending products can be approved")
@@ -93,7 +92,6 @@ class Product(models.Model):
         self.status = self.Status.APPROVED
         self.save(update_fields=["status"])
 
-    @transaction.atomic
     def reject(self):
         if self.status != self.Status.PENDING:
             raise ValidationError("Only pending products can be rejected")
@@ -101,7 +99,6 @@ class Product(models.Model):
         self.status = self.Status.REJECTED
         self.save(update_fields=["status"])
 
-    @transaction.atomic
     def archive(self):
         if self.status != self.Status.APPROVED:
             raise ValidationError("Only approved products can be archived")
@@ -109,7 +106,6 @@ class Product(models.Model):
         self.status = self.Status.ARCHIVED
         self.save(update_fields=["status"])
 
-    @transaction.atomic
     def restore_from_archive(self):
         if self.status != self.Status.ARCHIVED:
             raise ValidationError("Only archived products can be restored")
@@ -117,7 +113,6 @@ class Product(models.Model):
         self.status = self.Status.APPROVED
         self.save(update_fields=["status"])
 
-    @transaction.atomic
     def soft_delete(self):
         if self.is_deleted:
             return
@@ -125,7 +120,6 @@ class Product(models.Model):
         self.is_deleted = True
         self.save(update_fields=["is_deleted"])
 
-    @transaction.atomic
     def restore(self):
         if not self.is_deleted:
             return
@@ -138,7 +132,7 @@ class Product(models.Model):
         slug = base_slug
         counter = 1
 
-        while Product.all_objects.filter(slug=slug).exclude(pk=self.pk).exists():
+        while self.__class__.all_objects.filter(slug=slug).exclude(pk=self.pk).exists():
             slug = f"{base_slug}-{counter}"
             counter += 1
 
@@ -163,11 +157,6 @@ class Product(models.Model):
 
         self.full_clean()
 
-        try:
-            super().save(*args, **kwargs)
-        except IntegrityError:
-            self.slug = self._generate_unique_slug()
-            super().save(*args, **kwargs)
 
     class Meta:
         indexes = [
@@ -178,12 +167,12 @@ class Product(models.Model):
             ),
             models.Index(
                 fields=['category', '-created_at'],
-                condition=Q(status='approved', is_deleted=False),
+                condition=Q(status=Product.Status.APPROVED, is_deleted=False),
                 name='idx_product_category'
             ),
             models.Index(
                 fields=['-created_at'],
-                condition=Q(status='approved', is_deleted=False),
+                condition=Q(status=Product.Status.APPROVED, is_deleted=False),
                 name='idx_product_feed'
             ),
             models.Index(fields=['status']),
