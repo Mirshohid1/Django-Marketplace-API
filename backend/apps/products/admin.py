@@ -83,20 +83,19 @@ class ProductAdmin(admin.ModelAdmin):
     @admin.action(description="Approve selected products")
     def approve_products(self, request, queryset):
         for product in queryset:
-            if product.status == Product.Status.PENDING:
-                product.status = Product.Status.APPROVED
-                product.save(update_fields=["status"])
+            product.approve()
 
     @admin.action(description="Archive selected products")
     def archive_products(self, request, queryset):
-        queryset.filter(
-            status=Product.Status.APPROVED
-        ).update(status=Product.Status.ARCHIVED)
+        for product in queryset.filter(status=Product.Status.APPROVED):
+            product.archive()
 
     @admin.action(description="Soft delete selected products")
     def soft_delete_products(self, request, queryset):
-        queryset.update(is_deleted=True)
+        for product in queryset:
+            product.soft_delete()
 
     @admin.action(description="Restore selected products")
     def restore_products(self, request, queryset):
-        queryset.update(is_deleted=False)
+        for product in queryset:
+            product.restore()

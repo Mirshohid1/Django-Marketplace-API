@@ -156,6 +156,7 @@ class Product(models.Model):
             self.slug = self._generate_unique_slug()
 
         self.full_clean()
+        super().save(*args, **kwargs)
 
 
     class Meta:

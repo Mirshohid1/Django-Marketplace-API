@@ -4,6 +4,7 @@ from rest_framework.viewsets import ModelViewSet
 from rest_framework.permissions import IsAuthenticated, IsAdminUser
 from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework.filters import SearchFilter, OrderingFilter
+from rest_framework.decorators import action
 from django.db.models import Q
 from .models import Category, Product
 from .permissions import IsOwner, IsOwnerOrAdmin, IsAdminOrReadOnly, IsVerified
@@ -11,7 +12,7 @@ from .pagination import ProductCursorPagination
 from .serializers import (
     CategorySerializer, CategoryCreateUpdateSerializer,
     ProductListSerializer, ProductDetailSerializer,
-    ProductCreateUpdateSerializer, ProductStatusUpdateSerializer
+    ProductCreateUpdateSerializer
 )
 
 
