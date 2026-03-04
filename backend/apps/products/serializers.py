@@ -56,10 +56,3 @@ class ProductCreateUpdateSerializer(serializers.ModelSerializer):
         validated_data['owner'] = self.context['request'].user
         validated_data['status'] = Product.Status.PENDING
         return super().create(validated_data)
-
-
-class ProductStatusUpdateSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = Product
-        fields = ('status',)
-
