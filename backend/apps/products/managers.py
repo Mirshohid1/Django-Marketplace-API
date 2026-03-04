@@ -30,12 +30,6 @@ class ProductQuerySet(models.QuerySet):
     def for_owner(self, owner):
         return self.alive().filter(owner=owner).order_by("-created_at")
 
-    def soft_delete(self):
-        return self.update(is_deleted=True)
-
-    def restore(self):
-        return self.update(is_deleted=False)
-
 
 class ProductManager(models.Manager):
 
