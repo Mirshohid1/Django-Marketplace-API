@@ -4,7 +4,7 @@ from unittest.mock import patch
 from django.urls import reverse
 from ..models import EmailVerification
 from ..service.validators import PasswordValidationService
-from ..service.email import (
+from ..service.tasks import (
     create_email_verification,
     send_email_verification,
 )

@@ -88,6 +88,8 @@ class EmailVerification(models.Model):
         super().save(*args, **kwargs)
 
     def is_expired(self):
+        if not self.expires_at:
+            return False
         return self.expires_at <= timezone.now()
 
     def __str__(self):

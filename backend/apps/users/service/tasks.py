@@ -2,6 +2,7 @@ from django.db import transaction
 from django.core.mail import send_mail
 from django.conf import settings
 from django.urls import reverse
+from celery import shared_task
 from ..models import EmailVerification
 
 
@@ -11,17 +12,14 @@ def create_email_verification(user):
     verification = EmailVerification.objects.create(user=user)
     return verification
 
-def send_email_verification(user, token, request):
-    relative_url = reverse(
-        "verify",  # name из urls.py
-        kwargs={"token": token}
-    )
-
-    absolute_url = request.build_absolute_uri(relative_url)
+@shared_task
+def send_email_verification(user_email, token, domain):
+    relative_url = reverse("verify", kwargs={"token": token})
+    absolute_url = f"http://{domain}{relative_url}"
 
     send_mail(
         "Verify your email",
         f"Click link: {absolute_url}",
         settings.DEFAULT_FROM_EMAIL,
-        [user.email],
+        [user_email],
     )

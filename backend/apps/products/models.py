@@ -178,3 +178,7 @@ class Product(models.Model):
             ),
             models.Index(fields=['status']),
         ]
+
+
+class ProductVariant(models.Model):
+    pass

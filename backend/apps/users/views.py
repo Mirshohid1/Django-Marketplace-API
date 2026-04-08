@@ -4,7 +4,7 @@ from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.response import Response
 from rest_framework import status
 from rest_framework.throttling import UserRateThrottle
-from .service.email import create_email_verification, send_email_verification
+from .service.tasks import create_email_verification, send_email_verification
 from .models import EmailVerification
 
 from .serializers import (
@@ -20,7 +20,7 @@ class RegisterAPIView(CreateAPIView):
     def perform_create(self, serializer):
         user = serializer.save()
         verification = create_email_verification(user)
-        send_email_verification(user, verification.token, self.request)
+        send_email_verification.delay(user.email, verification.token, self.request.get_host())
 
 
 class LoginAPIView(GenericAPIView):
@@ -112,7 +112,7 @@ class ResendVerificationAPIView(APIView):
             )
 
         verification = create_email_verification(user)
-        send_email_verification(user, verification.token, request)
+        send_email_verification.delay(user.email, verification.token, request.get_host())
 
         return Response(
             {"detail": "Verification email sent"},
