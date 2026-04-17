@@ -1,11 +1,12 @@
-from django.contrib.auth.admin import UserAdmin
 from django.contrib import admin
-from .models import User, EmailVerification
+from django.contrib.auth.admin import UserAdmin
+
+from .models import EmailVerification, User
 
 
 class EmailVerificationInline(admin.StackedInline):
     model = EmailVerification
-    readonly_fields = ('token', 'created_at', 'updated_at', 'is_expired')
+    readonly_fields = ("token", "created_at", "updated_at", "is_expired")
     verbose_name_plural = "Email Verification"
     can_delete = False
 
@@ -13,84 +14,88 @@ class EmailVerificationInline(admin.StackedInline):
 @admin.register(User)
 class CustomUserAdmin(UserAdmin):
 
-    ordering = ('-created_at',)
+    ordering = ("-created_at",)
 
     list_display = (
-        'id',
-        'email',
-        'username',
-        'first_name',
-        'last_name',
-        'is_staff',
-        'is_superuser',
-        'is_active',
-        'is_verified',
-        'created_at',
+        "id",
+        "email",
+        "username",
+        "first_name",
+        "last_name",
+        "is_staff",
+        "is_superuser",
+        "is_active",
+        "is_verified",
+        "created_at",
     )
 
     list_filter = (
-        'is_staff',
-        'is_superuser',
-        'is_active',
-        'is_verified',
-        'created_at',
+        "is_staff",
+        "is_superuser",
+        "is_active",
+        "is_verified",
+        "created_at",
     )
 
     search_fields = (
-        'email',
-        'username',
-        'first_name',
-        'last_name',
+        "email",
+        "username",
+        "first_name",
+        "last_name",
     )
 
     readonly_fields = (
-        'created_at',
-        'updated_at',
-        'last_login',
+        "created_at",
+        "updated_at",
+        "last_login",
     )
 
     fieldsets = (
         (None, {"fields": ("email", "username", "password")}),
-
-        ("Personal info", {
-            "fields": ("first_name", "last_name")
-        }),
-
-        ("Permissions", {
-            "fields": (
-                "is_active",
-                "is_staff",
-                "is_superuser",
-                "is_verified",
-                "groups",
-                "user_permissions",
-            )
-        }),
-
-        ("Timestamps", {
-            "fields": (
-                "last_login",
-                "created_at",
-                "updated_at",
-            )
-        }),
+        ("Personal info", {"fields": ("first_name", "last_name")}),
+        (
+            "Permissions",
+            {
+                "fields": (
+                    "is_active",
+                    "is_staff",
+                    "is_superuser",
+                    "is_verified",
+                    "groups",
+                    "user_permissions",
+                )
+            },
+        ),
+        (
+            "Timestamps",
+            {
+                "fields": (
+                    "last_login",
+                    "created_at",
+                    "updated_at",
+                )
+            },
+        ),
     )
 
     add_fieldsets = (
-        (None, {
-            "classes": ("wide",),
-            "fields": (
-                "email",
-                "username",
-                "first_name",
-                "last_name",
-                "password1",
-                "password2",
-                "is_staff",
-                "is_active",
-                "is_verified",
-            ),
-        }),
+        (
+            None,
+            {
+                "classes": ("wide",),
+                "fields": (
+                    "email",
+                    "username",
+                    "first_name",
+                    "last_name",
+                    "password1",
+                    "password2",
+                    "is_staff",
+                    "is_active",
+                    "is_verified",
+                ),
+            },
+        ),
     )
     inlines = [EmailVerificationInline]
 

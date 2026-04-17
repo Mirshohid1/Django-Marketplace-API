@@ -1,18 +1,24 @@
-from rest_framework_simplejwt.views import TokenRefreshView
 from django.urls import path
+from rest_framework_simplejwt.views import TokenRefreshView
 from users.views import (
-    RegisterAPIView, LoginAPIView,
-    MeAPIView, LogoutAPIView,
-    VerifyEmailAPIView, ResendVerificationAPIView
+    LoginAPIView,
+    LogoutAPIView,
+    MeAPIView,
+    RegisterAPIView,
+    ResendVerificationAPIView,
+    VerifyEmailAPIView,
 )
 
-
 urlpatterns = [
-    path('login/', LoginAPIView.as_view(), name='login'),
-    path('register/', RegisterAPIView.as_view(), name='register'),
-    path('logout/', LogoutAPIView.as_view(), name='logout'),
-    path('refresh/', TokenRefreshView.as_view(), name='token_refresh'),
-    path('me/', MeAPIView.as_view(), name='me'),
-    path('verify/<uuid:token>/', VerifyEmailAPIView.as_view(), name='verify'),
-    path('resend_verification/', ResendVerificationAPIView.as_view(), name='resend_verification'),
+    path("login/", LoginAPIView.as_view(), name="login"),
+    path("register/", RegisterAPIView.as_view(), name="register"),
+    path("logout/", LogoutAPIView.as_view(), name="logout"),
+    path("refresh/", TokenRefreshView.as_view(), name="token_refresh"),
+    path("me/", MeAPIView.as_view(), name="me"),
+    path("verify/<uuid:token>/", VerifyEmailAPIView.as_view(), name="verify"),
+    path(
+        "resend_verification/",
+        ResendVerificationAPIView.as_view(),
+        name="resend_verification",
+    ),
 ]

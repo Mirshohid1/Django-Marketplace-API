@@ -6,12 +6,12 @@ from django.db import migrations
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('users', '0007_emailverification_is_used'),
+        ("users", "0007_emailverification_is_used"),
     ]
 
     operations = [
         migrations.RemoveField(
-            model_name='emailverification',
-            name='is_used',
+            model_name="emailverification",
+            name="is_used",
         ),
     ]

@@ -1,8 +1,9 @@
-from django.db import transaction
-from django.core.mail import send_mail
-from django.conf import settings
-from django.urls import reverse
 from celery import shared_task
+from django.conf import settings
+from django.core.mail import send_mail
+from django.db import transaction
+from django.urls import reverse
+
 from ..models import EmailVerification
 
 
@@ -11,6 +12,7 @@ def create_email_verification(user):
     EmailVerification.objects.filter(user=user).delete()
     verification = EmailVerification.objects.create(user=user)
     return verification
+
 
 @shared_task
 def send_email_verification(user_email, token, domain):

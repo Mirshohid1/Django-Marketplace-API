@@ -1,10 +1,11 @@
 from django.core.exceptions import ValidationError
 from django.core.validators import MinValueValidator
-from django.db import models, transaction, IntegrityError
-from django.utils.text import slugify
+from django.db import models
 from django.db.models import Q
+from django.utils.text import slugify
 from users.models import User
-from .managers import ProductQuerySet, ProductManager
+
+from .managers import ProductManager, ProductQuerySet
 
 
 class Category(models.Model):
@@ -12,10 +13,7 @@ class Category(models.Model):
     slug = models.SlugField(max_length=200, unique=True)
 
     parent = models.ForeignKey(
-        'self',
-        on_delete=models.CASCADE,
-        null=True, blank=True,
-        related_name='children'
+        "self", on_delete=models.CASCADE, null=True, blank=True, related_name="children"
     )
 
     is_active = models.BooleanField(default=True)
@@ -24,9 +22,9 @@ class Category(models.Model):
     updated_at = models.DateTimeField(auto_now=True)
 
     class Meta:
-        ordering = ('-created_at',)
-        verbose_name = 'Category'
-        verbose_name_plural = 'Categories'
+        ordering = ("-created_at",)
+        verbose_name = "Category"
+        verbose_name_plural = "Categories"
 
     def __str__(self):
         return self.name
@@ -35,23 +33,16 @@ class Category(models.Model):
 class Product(models.Model):
 
     class Status(models.TextChoices):
-        DRAFT = 'draft'
-        PENDING = 'pending'
-        APPROVED = 'approved'
-        REJECTED = 'rejected'
-        ARCHIVED = 'archived'
+        DRAFT = "draft"
+        PENDING = "pending"
+        APPROVED = "approved"
+        REJECTED = "rejected"
+        ARCHIVED = "archived"
 
-
-    owner = models.ForeignKey(
-        User,
-        on_delete=models.CASCADE,
-        related_name='products'
-    )
+    owner = models.ForeignKey(User, on_delete=models.CASCADE, related_name="products")
 
     category = models.ForeignKey(
-        'Category',
-        on_delete=models.PROTECT,
-        related_name='products'
+        "Category", on_delete=models.PROTECT, related_name="products"
     )
 
     title = models.CharField(max_length=155)
@@ -60,17 +51,13 @@ class Product(models.Model):
     description = models.TextField()
 
     price = models.DecimalField(
-        max_digits=10,
-        decimal_places=2,
-        validators=[MinValueValidator(0)]
+        max_digits=10, decimal_places=2, validators=[MinValueValidator(0)]
     )
 
     is_deleted = models.BooleanField(default=False)
 
     status = models.CharField(
-        choices=Status.choices,
-        default=Status.DRAFT,
-        max_length=10
+        choices=Status.choices, default=Status.DRAFT, max_length=10
     )
 
     created_at = models.DateTimeField(auto_now_add=True)
@@ -80,10 +67,10 @@ class Product(models.Model):
     all_objects = ProductQuerySet.as_manager()
 
     def is_editable(self):
-        return (
-            not self.is_deleted and
-            self.status in {self.Status.DRAFT, self.Status.REJECTED}
-        )
+        return not self.is_deleted and self.status in {
+            self.Status.DRAFT,
+            self.Status.REJECTED,
+        }
 
     def approve(self):
         if self.status != self.Status.PENDING:
@@ -158,25 +145,24 @@ class Product(models.Model):
         self.full_clean()
         super().save(*args, **kwargs)
 
-
     class Meta:
         indexes = [
             models.Index(
-                fields=['owner', '-created_at'],
+                fields=["owner", "-created_at"],
                 condition=Q(is_deleted=False),
-                name='idx_product_owner'
+                name="idx_product_owner",
             ),
             models.Index(
-                fields=['category', '-created_at'],
-                condition=Q(status='approved', is_deleted=False),
-                name='idx_product_category'
+                fields=["category", "-created_at"],
+                condition=Q(status="approved", is_deleted=False),
+                name="idx_product_category",
             ),
             models.Index(
-                fields=['-created_at'],
-                condition=Q(status='approved', is_deleted=False),
-                name='idx_product_feed'
+                fields=["-created_at"],
+                condition=Q(status="approved", is_deleted=False),
+                name="idx_product_feed",
             ),
-            models.Index(fields=['status']),
+            models.Index(fields=["status"]),
         ]
 
 

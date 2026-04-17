@@ -7,13 +7,23 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('users', '0004_alter_user_username'),
+        ("users", "0004_alter_user_username"),
     ]
 
     operations = [
         migrations.AlterField(
-            model_name='user',
-            name='username',
-            field=models.CharField(blank=True, max_length=155, unique=True, validators=[django.core.validators.RegexValidator(message='Username may contain only letters, numbers, dots, underscores and hyphens.', regex='^[a-zA-Z0-9._-]+$')]),
+            model_name="user",
+            name="username",
+            field=models.CharField(
+                blank=True,
+                max_length=155,
+                unique=True,
+                validators=[
+                    django.core.validators.RegexValidator(
+                        message="Username may contain only letters, numbers, dots, underscores and hyphens.",
+                        regex="^[a-zA-Z0-9._-]+$",
+                    )
+                ],
+            ),
         ),
     ]

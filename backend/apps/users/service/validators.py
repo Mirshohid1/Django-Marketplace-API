@@ -5,7 +5,9 @@ from django.core.exceptions import ValidationError
 class PasswordSimilarityValidator:
 
     @staticmethod
-    def validate(password: str, username=None, email=None, first_name=None, last_name=None):
+    def validate(
+        password: str, username=None, email=None, first_name=None, last_name=None
+    ):
         forbidden_values = []
 
         if username:
@@ -16,7 +18,7 @@ class PasswordSimilarityValidator:
             forbidden_values.append(last_name)
 
         if email:
-            local_part = email.split('@')[0]
+            local_part = email.split("@")[0]
             forbidden_values.append(local_part)
 
         password_lower = password.lower()
@@ -29,7 +31,11 @@ class PasswordSimilarityValidator:
 class PasswordValidationService:
 
     @staticmethod
-    def validate(password: str, username=None, email=None, first_name=None, last_name=None):
-        PasswordSimilarityValidator.validate(password, username, email, first_name, last_name)
+    def validate(
+        password: str, username=None, email=None, first_name=None, last_name=None
+    ):
+        PasswordSimilarityValidator.validate(
+            password, username, email, first_name, last_name
+        )
 
         validate_password(password)

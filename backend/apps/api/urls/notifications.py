@@ -1,8 +1,7 @@
-from rest_framework.routers import DefaultRouter
 from notifications.views import NotificationViewSet
-
+from rest_framework.routers import DefaultRouter
 
 router = DefaultRouter()
-router.register(r'notification', NotificationViewSet, basename='notification')
+router.register(r"notification", NotificationViewSet, basename="notification")
 
 urlpatterns = router.urls

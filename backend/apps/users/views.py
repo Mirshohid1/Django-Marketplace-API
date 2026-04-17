@@ -1,16 +1,19 @@
+from rest_framework import status
 from rest_framework.generics import CreateAPIView, GenericAPIView, RetrieveUpdateAPIView
-from rest_framework.views import APIView
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.response import Response
-from rest_framework import status
 from rest_framework.throttling import UserRateThrottle
-from .service.tasks import create_email_verification, send_email_verification
-from .models import EmailVerification
+from rest_framework.views import APIView
 
+from .models import EmailVerification
 from .serializers import (
-    RegisterSerializer, LoginSerializer, LogoutSerializer,
-    UserSerializer, UserOutPutSerializer
+    LoginSerializer,
+    LogoutSerializer,
+    RegisterSerializer,
+    UserOutPutSerializer,
+    UserSerializer,
 )
+from .service.tasks import create_email_verification, send_email_verification
 
 
 class RegisterAPIView(CreateAPIView):
@@ -20,7 +23,9 @@ class RegisterAPIView(CreateAPIView):
     def perform_create(self, serializer):
         user = serializer.save()
         verification = create_email_verification(user)
-        send_email_verification.delay(user.email, verification.token, self.request.get_host())
+        send_email_verification.delay(
+            user.email, verification.token, self.request.get_host()
+        )
 
 
 class LoginAPIView(GenericAPIView):
@@ -31,10 +36,13 @@ class LoginAPIView(GenericAPIView):
         serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
 
-        return Response({
-            "access": serializer.validated_data["access"],
-            "refresh": serializer.validated_data["refresh"],
-        }, status=status.HTTP_200_OK)
+        return Response(
+            {
+                "access": serializer.validated_data["access"],
+                "refresh": serializer.validated_data["refresh"],
+            },
+            status=status.HTTP_200_OK,
+        )
 
 
 class LogoutAPIView(GenericAPIView):
@@ -52,7 +60,7 @@ class MeAPIView(RetrieveUpdateAPIView):
     permission_classes = [IsAuthenticated]
 
     def get_serializer_class(self):
-        if self.request.method == 'GET':
+        if self.request.method == "GET":
             return UserOutPutSerializer
         return UserSerializer
 
@@ -68,18 +76,18 @@ class VerifyEmailAPIView(APIView):
     def get(self, request, token):
 
         try:
-            verification = EmailVerification.objects.select_related("user").get(token=token)
+            verification = EmailVerification.objects.select_related("user").get(
+                token=token
+            )
         except EmailVerification.DoesNotExist:
             return Response(
-                {"detail": "Invalid token"},
-                status=status.HTTP_400_BAD_REQUEST
+                {"detail": "Invalid token"}, status=status.HTTP_400_BAD_REQUEST
             )
 
         if verification.is_expired():
             verification.delete()
             return Response(
-                {"detail": "Token expired"},
-                status=status.HTTP_400_BAD_REQUEST
+                {"detail": "Token expired"}, status=status.HTTP_400_BAD_REQUEST
             )
 
         user = verification.user
@@ -88,10 +96,7 @@ class VerifyEmailAPIView(APIView):
 
         verification.delete()
 
-        return Response(
-            {"detail": "Email verified"},
-            status=status.HTTP_200_OK
-        )
+        return Response({"detail": "Email verified"}, status=status.HTTP_200_OK)
 
 
 class ResendThrottle(UserRateThrottle):
@@ -107,14 +112,14 @@ class ResendVerificationAPIView(APIView):
 
         if user.is_verified:
             return Response(
-                {"detail": "Email already verified"},
-                status=status.HTTP_400_BAD_REQUEST
+                {"detail": "Email already verified"}, status=status.HTTP_400_BAD_REQUEST
             )
 
         verification = create_email_verification(user)
-        send_email_verification.delay(user.email, verification.token, request.get_host())
+        send_email_verification.delay(
+            user.email, verification.token, request.get_host()
+        )
 
         return Response(
-            {"detail": "Verification email sent"},
-            status=status.HTTP_200_OK
+            {"detail": "Verification email sent"}, status=status.HTTP_200_OK
         )

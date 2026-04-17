@@ -9,24 +9,44 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('users', '0005_alter_user_username'),
+        ("users", "0005_alter_user_username"),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='user',
-            name='is_verified',
+            model_name="user",
+            name="is_verified",
             field=models.BooleanField(default=False),
         ),
         migrations.CreateModel(
-            name='EmailVerification',
+            name="EmailVerification",
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('token', models.UUIDField(db_index=True, default=uuid.uuid4, editable=False, unique=True)),
-                ('created_at', models.DateTimeField(auto_now_add=True)),
-                ('updated_at', models.DateTimeField(auto_now=True)),
-                ('expires_at', models.DateTimeField()),
-                ('user', models.OneToOneField(on_delete=django.db.models.deletion.CASCADE, related_name='email_verification', to=settings.AUTH_USER_MODEL)),
+                (
+                    "id",
+                    models.BigAutoField(
+                        auto_created=True,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name="ID",
+                    ),
+                ),
+                (
+                    "token",
+                    models.UUIDField(
+                        db_index=True, default=uuid.uuid4, editable=False, unique=True
+                    ),
+                ),
+                ("created_at", models.DateTimeField(auto_now_add=True)),
+                ("updated_at", models.DateTimeField(auto_now=True)),
+                ("expires_at", models.DateTimeField()),
+                (
+                    "user",
+                    models.OneToOneField(
+                        on_delete=django.db.models.deletion.CASCADE,
+                        related_name="email_verification",
+                        to=settings.AUTH_USER_MODEL,
+                    ),
+                ),
             ],
         ),
     ]

@@ -1,12 +1,13 @@
-from django.contrib.auth.models import AbstractBaseUser, PermissionsMixin
-from django.db import models
-from django.core.validators import RegexValidator
-from django.utils.text import slugify
-from django.utils import timezone
-from datetime import timedelta
-from .managers import UserManager
-
 import uuid
+from datetime import timedelta
+
+from django.contrib.auth.models import AbstractBaseUser, PermissionsMixin
+from django.core.validators import RegexValidator
+from django.db import models
+from django.utils import timezone
+from django.utils.text import slugify
+
+from .managers import UserManager
 
 
 class User(AbstractBaseUser, PermissionsMixin):
@@ -15,10 +16,15 @@ class User(AbstractBaseUser, PermissionsMixin):
         unique=True,
         validators=[
             RegexValidator(
-                regex=r'^[a-zA-Z0-9._-]+$',
-                message='Username may contain only letters, numbers, dots, underscores and hyphens.'
+                regex=r"^[a-zA-Z0-9._-]+$",
+                message=(
+                    "Username must contain only letters, numbers "
+                    "and allowed special characters."
+                ),
             )
-        ], blank=True, null=False
+        ],
+        blank=True,
+        null=False,
     )
     email = models.EmailField(max_length=155, unique=True)
     first_name = models.CharField(max_length=155, blank=True)
@@ -29,7 +35,7 @@ class User(AbstractBaseUser, PermissionsMixin):
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
-    USERNAME_FIELD = 'email'
+    USERNAME_FIELD = "email"
     objects = UserManager()
 
     def generate_username(self):
@@ -68,7 +74,7 @@ class EmailVerification(models.Model):
     user = models.OneToOneField(
         User,
         on_delete=models.CASCADE,
-        related_name='email_verification',
+        related_name="email_verification",
     )
 
     token = models.UUIDField(
@@ -94,4 +100,3 @@ class EmailVerification(models.Model):
 
     def __str__(self):
         return f"EmailVerification: {self.user}"
-

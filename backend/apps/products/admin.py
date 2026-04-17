@@ -1,5 +1,6 @@
 from django.contrib import admin
 from django.db.models import Count
+
 from .models import Category, Product
 
 
@@ -78,7 +79,6 @@ class ProductAdmin(admin.ModelAdmin):
 
     def get_queryset(self, request):
         return Product.all_objects.select_related("owner", "category")
-
 
     @admin.action(description="Approve selected products")
     def approve_products(self, request, queryset):

@@ -1,6 +1,7 @@
 from rest_framework import serializers
-from .models import Category, Product
 from users.serializers import UserOutPutSerializer
+
+from .models import Category, Product
 
 
 class CategorySerializer(serializers.Serializer):
@@ -15,7 +16,7 @@ class CategorySerializer(serializers.Serializer):
 class CategoryCreateUpdateSerializer(serializers.ModelSerializer):
     class Meta:
         model = Category
-        fields = ('name', 'parent')
+        fields = ("name", "parent")
 
 
 class ProductListSerializer(serializers.Serializer):
@@ -48,11 +49,13 @@ class ProductCreateUpdateSerializer(serializers.ModelSerializer):
     class Meta:
         model = Product
         fields = (
-            'title', 'description',
-            'price', 'category',
+            "title",
+            "description",
+            "price",
+            "category",
         )
 
     def create(self, validated_data):
-        validated_data['owner'] = self.context['request'].user
-        validated_data['status'] = Product.Status.PENDING
+        validated_data["owner"] = self.context["request"].user
+        validated_data["status"] = Product.Status.PENDING
         return super().create(validated_data)
