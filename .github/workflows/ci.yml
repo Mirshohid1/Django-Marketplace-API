@@ -49,7 +49,7 @@ jobs:
 
       - name: Install dependencies
         run: |
-          pip install -r requirements/development.txt
+          pip install -r backend/requirements/development.txt
           pip install pre-commit
 
       - name: Wait for Postgres
