@@ -30,6 +30,10 @@ jobs:
       DB_HOST: localhost
       DB_PORT: 5432
       SECRET_KEY: test-secret-key
+      ALLOWED_HOSTS: localhost
+      DEBUG: "True"
+      EMAIL_HOST_USER: test_user
+      EMAIL_HOST_PASSWORD: test_password
 
     steps:
       - name: Checkout
