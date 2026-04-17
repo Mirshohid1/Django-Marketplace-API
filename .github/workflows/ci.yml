@@ -29,6 +29,7 @@ jobs:
       DB_PASSWORD: test_pass
       DB_HOST: localhost
       DB_PORT: 5432
+      SECRET_KEY: test-secret-key
 
     steps:
       - name: Checkout
