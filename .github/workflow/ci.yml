@@ -65,3 +65,5 @@ jobs:
         run: |
           cd backend
           pytest
+        env:
+          DJANGO_SETTINGS_MODULE: config.settings.development
