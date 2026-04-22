@@ -1,6 +1,7 @@
 from rest_framework import status
+from rest_framework.authentication import BaseAuthentication
 from rest_framework.generics import CreateAPIView, GenericAPIView, RetrieveUpdateAPIView
-from rest_framework.permissions import AllowAny, IsAuthenticated
+from rest_framework.permissions import AllowAny, BasePermission, IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.throttling import UserRateThrottle
 from rest_framework.views import APIView
@@ -70,8 +71,8 @@ class MeAPIView(RetrieveUpdateAPIView):
 
 class VerifyEmailAPIView(APIView):
 
-    authentication_classes = []
-    permission_classes = []
+    authentication_classes: list[type[BaseAuthentication]] = []
+    permission_classes: list[type[BasePermission]] = []
 
     def get(self, request, token):
 

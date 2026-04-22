@@ -1,3 +1,5 @@
+from typing import Any
+
 from django.core.exceptions import ValidationError
 from django.core.validators import MinValueValidator
 from django.db import models
@@ -26,7 +28,7 @@ class Category(models.Model):
         verbose_name = "Category"
         verbose_name_plural = "Categories"
 
-    def __str__(self):
+    def __str__(self) -> str:
         return self.name
 
 
@@ -64,50 +66,50 @@ class Product(models.Model):
     updated_at = models.DateTimeField(auto_now=True)
 
     objects = ProductManager()
-    all_objects = ProductQuerySet.as_manager()
+    all_objects: models.Manager["Product"] = ProductQuerySet.as_manager()
 
-    def is_editable(self):
+    def is_editable(self) -> bool:
         return not self.is_deleted and self.status in {
             self.Status.DRAFT,
             self.Status.REJECTED,
         }
 
-    def approve(self):
+    def approve(self) -> None:
         if self.status != self.Status.PENDING:
             raise ValidationError("Only pending products can be approved")
 
         self.status = self.Status.APPROVED
         self.save(update_fields=["status"])
 
-    def reject(self):
+    def reject(self) -> None:
         if self.status != self.Status.PENDING:
             raise ValidationError("Only pending products can be rejected")
 
         self.status = self.Status.REJECTED
         self.save(update_fields=["status"])
 
-    def archive(self):
+    def archive(self) -> None:
         if self.status != self.Status.APPROVED:
             raise ValidationError("Only approved products can be archived")
 
         self.status = self.Status.ARCHIVED
         self.save(update_fields=["status"])
 
-    def restore_from_archive(self):
+    def restore_from_archive(self) -> None:
         if self.status != self.Status.ARCHIVED:
             raise ValidationError("Only archived products can be restored")
 
         self.status = self.Status.APPROVED
         self.save(update_fields=["status"])
 
-    def soft_delete(self):
+    def soft_delete(self) -> None:
         if self.is_deleted:
             return
 
         self.is_deleted = True
         self.save(update_fields=["is_deleted"])
 
-    def restore(self):
+    def restore(self) -> None:
         if not self.is_deleted:
             return
 
@@ -125,7 +127,7 @@ class Product(models.Model):
 
         return slug
 
-    def clean(self):
+    def clean(self) -> None:
         if self.title:
             self.title = " ".join(self.title.split())
 
@@ -138,7 +140,7 @@ class Product(models.Model):
         if self.description and len(self.description) < 20:
             raise ValidationError("Description must be at least 20 characters")
 
-    def save(self, *args, **kwargs):
+    def save(self, *args: Any, **kwargs: Any) -> None:
         if not self.slug:
             self.slug = self._generate_unique_slug()
 

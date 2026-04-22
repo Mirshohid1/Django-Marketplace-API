@@ -1,9 +1,14 @@
+from typing import TYPE_CHECKING, Any
+
 from django.contrib.auth.base_user import BaseUserManager
 
+if TYPE_CHECKING:
+    from .models import User
 
-class UserManager(BaseUserManager):
 
-    def create_user(self, email, password=None, **extra_fields):
+class UserManager(BaseUserManager["User"]):
+
+    def create_user(self, email: str, password=None, **extra_fields: Any) -> "User":
         if not email:
             raise ValueError("Users must have an email address")
 
@@ -15,7 +20,9 @@ class UserManager(BaseUserManager):
 
         return user
 
-    def create_superuser(self, email, password=None, **extra_fields):
+    def create_superuser(
+        self, email: str, password=None, **extra_fields: Any
+    ) -> "User":
         extra_fields.setdefault("is_staff", True)
         extra_fields.setdefault("is_superuser", True)
         extra_fields.setdefault("is_active", True)

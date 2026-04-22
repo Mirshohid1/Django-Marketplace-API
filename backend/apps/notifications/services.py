@@ -1,9 +1,14 @@
-from .models import Notification
+from typing import TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from users.models import User
+
+    from .models import Notification
 
 
 def create_notification(
-    user, notification_type, title, message, related_object_id=None
-):
+    user: User, notification_type: str, title: str, message: str, related_object_id=None
+) -> Notification:
     return Notification.objects.create(
         user=user,
         notification_type=notification_type,

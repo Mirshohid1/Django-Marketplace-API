@@ -7,7 +7,7 @@ class PasswordSimilarityValidator:
     @staticmethod
     def validate(
         password: str, username=None, email=None, first_name=None, last_name=None
-    ):
+    ) -> None:
         forbidden_values = []
 
         if username:
@@ -33,7 +33,7 @@ class PasswordValidationService:
     @staticmethod
     def validate(
         password: str, username=None, email=None, first_name=None, last_name=None
-    ):
+    ) -> None:
         PasswordSimilarityValidator.validate(
             password, username, email, first_name, last_name
         )

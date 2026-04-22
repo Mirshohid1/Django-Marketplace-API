@@ -8,7 +8,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent.parent
 APPS_DIR = BASE_DIR / "apps"
 sys.path.insert(0, str(APPS_DIR))
 env = environ.Env(DEBUG=(bool, False))
-environ.Env.read_env(env_file=".env")
+env.read_env(BASE_DIR / ".env")
 
 SECRET_KEY = env("SECRET_KEY")
 DEBUG = env("DEBUG")

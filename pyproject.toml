@@ -7,8 +7,56 @@ exclude = '''
 )/
 '''
 
-[tool.isort]
-profile = "black"
-line_length = 88
-skip = ["migrations"]
-skip_glob = ["**/migrations/*"]
+[tool.ruff]
+line-length = 88
+target-version = "py312"
+exclude = [
+    "migrations",
+    "settings"
+]
+
+[tool.ruff.lint]
+select = [
+    "E",  # pycodestyle errors
+    "F",  # pyflakes
+    "I",  # isort (imports)
+    "UP", # pyupgrade
+    "B",  # bugbear
+]
+ignore = [
+    "E501",
+]
+
+[tool.ruff.format]
+
+quote-style = "double"
+indent-style = "space"
+skip-magic-trailing-comma = false
+
+[tool.mypy]
+python_version = "3.12"
+ignore_missing_imports = true
+follow_imports = "silent"
+
+warn_return_any = false
+warn_unused_ignores = false
+
+disallow_untyped_defs = false
+disallow_incomplete_defs = false
+
+check_untyped_defs = false
+
+no_implicit_optional = false
+strict_optional = false
+
+plugins = ["mypy_django_plugin.main"]
+mypy_path = ["backend"]
+#strict = true
+
+exclude = [
+    "migrations",
+    "settings"
+]
+
+[tool.django-stubs]
+django_settings_module = "config.settings.development"

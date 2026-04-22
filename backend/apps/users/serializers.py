@@ -37,7 +37,7 @@ class RegisterSerializer(serializers.ModelSerializer):
         try:
             PasswordValidationService.validate(attrs["password"], **user_attrs)
         except DjangoValidationError as e:
-            raise serializers.ValidationError({"password": list(e.messages)})
+            raise serializers.ValidationError({"password": list(e.messages)}) from e
 
         if User.objects.filter(email=user_attrs["email"]).exists():
             raise serializers.ValidationError("Email already registered")
@@ -91,7 +91,7 @@ class LogoutSerializer(serializers.Serializer):
             token = RefreshToken(self.token)
             token.blacklist()
         except Exception:
-            raise serializers.ValidationError("Invalid token.")
+            raise serializers.ValidationError("Invalid token.") from None
 
 
 class UserSerializer(serializers.ModelSerializer):

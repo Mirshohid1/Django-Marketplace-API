@@ -1,5 +1,6 @@
 import uuid
 from datetime import timedelta
+from typing import Any
 
 from django.contrib.auth.models import AbstractBaseUser, PermissionsMixin
 from django.core.validators import RegexValidator
@@ -38,11 +39,11 @@ class User(AbstractBaseUser, PermissionsMixin):
     USERNAME_FIELD = "email"
     objects = UserManager()
 
-    def generate_username(self):
+    def generate_username(self) -> None:
         unique_id = str(uuid.uuid4())[:8]
         self.username = slugify(f"user-{unique_id}")
 
-    def clean(self):
+    def clean(self) -> None:
         super().clean()
 
         if self.first_name:
@@ -52,7 +53,7 @@ class User(AbstractBaseUser, PermissionsMixin):
         if self.email:
             self.email = self.email.strip().lower()
 
-    def save(self, *args, **kwargs):
+    def save(self, *args: Any, **kwargs: Any) -> None:
         self.full_clean()
 
         if not self.username:
@@ -60,13 +61,13 @@ class User(AbstractBaseUser, PermissionsMixin):
 
         super().save(*args, **kwargs)
 
-    def get_full_name(self):
+    def get_full_name(self) -> str:
         return f"{self.first_name} {self.last_name}"
 
-    def get_short_name(self):
+    def get_short_name(self) -> str:
         return self.first_name
 
-    def __str__(self):
+    def __str__(self) -> str:
         return self.email
 
 
@@ -88,15 +89,15 @@ class EmailVerification(models.Model):
     updated_at = models.DateTimeField(auto_now=True)
     expires_at = models.DateTimeField()
 
-    def save(self, *args, **kwargs):
+    def save(self, *args: Any, **kwargs: Any) -> None:
         if not self.expires_at:
             self.expires_at = timezone.now() + timedelta(minutes=30)
         super().save(*args, **kwargs)
 
-    def is_expired(self):
+    def is_expired(self) -> bool:
         if not self.expires_at:
             return False
         return self.expires_at <= timezone.now()
 
-    def __str__(self):
+    def __str__(self) -> str:
         return f"EmailVerification: {self.user}"

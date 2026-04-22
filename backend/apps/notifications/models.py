@@ -24,5 +24,5 @@ class Notification(models.Model):
 
     related_object_id = models.UUIDField(null=True, blank=True)
 
-    def __str__(self):
+    def __str__(self) -> str:
         return f"{self.user} - {self.notification_type}"

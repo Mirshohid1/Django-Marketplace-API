@@ -1,5 +1,6 @@
 from django.contrib import admin
-from django.db.models import Count
+from django.db.models import Count, QuerySet
+from django.http import HttpRequest
 
 from .models import Category, Product
 
@@ -20,14 +21,14 @@ class CategoryAdmin(admin.ModelAdmin):
 
     prepopulated_fields = {"slug": ("name",)}
 
-    def get_queryset(self, request):
+    def get_queryset(self, request: HttpRequest) -> QuerySet[Category]:
         qs = super().get_queryset(request)
         return qs.annotate(children_total=Count("children"))
 
-    def children_count(self, obj):
-        return obj.children_total
+    # def children_count(self, obj: Category) -> int:
+    #     return obj.children_total
 
-    children_count.short_description = "Children"
+    # children_count.short_description = "Children"
 
 
 @admin.register(Product)
@@ -77,25 +78,33 @@ class ProductAdmin(admin.ModelAdmin):
         "restore_products",
     )
 
-    def get_queryset(self, request):
+    def get_queryset(self, request: HttpRequest) -> QuerySet[Product]:
         return Product.all_objects.select_related("owner", "category")
 
     @admin.action(description="Approve selected products")
-    def approve_products(self, request, queryset):
+    def approve_products(
+        self, request: HttpRequest, queryset: QuerySet[Product]
+    ) -> None:
         for product in queryset:
             product.approve()
 
     @admin.action(description="Archive selected products")
-    def archive_products(self, request, queryset):
+    def archive_products(
+        self, request: HttpRequest, queryset: QuerySet[Product]
+    ) -> None:
         for product in queryset.filter(status=Product.Status.APPROVED):
             product.archive()
 
     @admin.action(description="Soft delete selected products")
-    def soft_delete_products(self, request, queryset):
+    def soft_delete_products(
+        self, request: HttpRequest, queryset: QuerySet[Product]
+    ) -> None:
         for product in queryset:
             product.soft_delete()
 
     @admin.action(description="Restore selected products")
-    def restore_products(self, request, queryset):
+    def restore_products(
+        self, request: HttpRequest, queryset: QuerySet[Product]
+    ) -> None:
         for product in queryset:
             product.restore()
