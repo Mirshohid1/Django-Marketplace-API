@@ -1,3 +1,4 @@
+from common.exceptions.base import ValidationError as CustomValidationError
 from django.core.exceptions import ValidationError as DjangoValidationError
 from django.db import transaction
 from django.db.models import Q
@@ -25,7 +26,7 @@ class RegisterSerializer(serializers.ModelSerializer):
 
     def validate(self, attrs):
         if attrs["password"] != attrs["password_confirm"]:
-            raise serializers.ValidationError({"password": "Passwords must match"})
+            raise CustomValidationError(details={"password": "Passwords must match"})
 
         user_attrs = {
             "username": attrs.get("username"),
@@ -37,16 +38,16 @@ class RegisterSerializer(serializers.ModelSerializer):
         try:
             PasswordValidationService.validate(attrs["password"], **user_attrs)
         except DjangoValidationError as e:
-            raise serializers.ValidationError({"password": list(e.messages)}) from e
+            raise CustomValidationError(details={"password": list(e.messages)}) from e
 
         if User.objects.filter(email=user_attrs["email"]).exists():
-            raise serializers.ValidationError("Email already registered")
+            raise CustomValidationError("Email already registered")
 
         if (
             user_attrs["username"]
             and User.objects.filter(username=user_attrs["username"]).exists()
         ):
-            raise serializers.ValidationError("Username already registered")
+            raise CustomValidationError("Username already registered")
 
         return attrs
 
@@ -70,7 +71,7 @@ class LoginSerializer(serializers.Serializer):
 
         user = User.objects.filter(Q(email=login) | Q(username=login)).first()
         if not user or not user.check_password(password):
-            raise serializers.ValidationError("Invalid credentials.")
+            raise CustomValidationError("Invalid credentials.")
 
         refresh = RefreshToken.for_user(user)
         return {
@@ -91,7 +92,7 @@ class LogoutSerializer(serializers.Serializer):
             token = RefreshToken(self.token)
             token.blacklist()
         except Exception:
-            raise serializers.ValidationError("Invalid token.") from None
+            raise CustomValidationError("Invalid token.") from None
 
 
 class UserSerializer(serializers.ModelSerializer):

@@ -1,5 +1,5 @@
+from common.exceptions.base import ValidationError
 from django.contrib.auth.password_validation import validate_password
-from django.core.exceptions import ValidationError
 
 
 class PasswordSimilarityValidator:
@@ -34,6 +34,7 @@ class PasswordValidationService:
     def validate(
         password: str, username=None, email=None, first_name=None, last_name=None
     ) -> None:
+
         PasswordSimilarityValidator.validate(
             password, username, email, first_name, last_name
         )

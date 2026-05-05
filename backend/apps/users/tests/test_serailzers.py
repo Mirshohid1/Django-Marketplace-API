@@ -1,7 +1,8 @@
 import pytest
+from common.exceptions import ValidationError
 
 from ..models import User
-from ..serializers import RegisterSerializer
+from ..serializers import LoginSerializer, RegisterSerializer
 
 
 @pytest.fixture
@@ -26,21 +27,21 @@ class TestRegisterSerializer:
             "last_name": "Doe",
         }
 
-    # @pytest.mark.parametrize(
-    #     "field, value",
-    #     [
-    #         ("username", "existing"),
-    #         ("email", "existing@example.com"),
-    #     ],
-    # )
-    # def test_unique_fields(self, valid_data, field, value, user):
-    #     data = valid_data.copy()
-    #     data[field] = value
-    #
-    #     serializer = RegisterSerializer(data=data)
-    #
-    #     assert not serializer.is_valid()
-    #     assert field in serializer.errors
+    @pytest.mark.parametrize(
+        "field, value",
+        [
+            ("username", "existing"),
+            ("email", "existing@example.com"),
+        ],
+    )
+    def test_unique_fields(self, valid_data, field, value, user):
+        data = valid_data.copy()
+        data[field] = value
+
+        serializer = RegisterSerializer(data=data)
+
+        assert not serializer.is_valid()
+        assert field in serializer.errors
 
     def test_password_must_match(self, valid_data):
         data = valid_data.copy()
@@ -48,78 +49,74 @@ class TestRegisterSerializer:
 
         serializer = RegisterSerializer(data=data)
 
-        assert not serializer.is_valid()
-        assert "password" in serializer.errors
+        with pytest.raises(ValidationError):
+            serializer.is_valid()
 
-    # @pytest.mark.parametrize(
-    #     "field, value",
-    #     [
-    #         ("password", "wrong"),
-    #         (
-    #             "password",
-    #             "3214",
-    #         ),
-    #         ("password", "Aa123456"),
-    #         ("password", "johndoe3214"),
-    #     ],
-    # )
-    # def test_validate_password(self, valid_data, field, value):
-    #     data = valid_data.copy()
-    #     data[field] = value
-    #     data["password_confirm"] = value
-    #
-    #     serializer = RegisterSerializer(data=data)
-    #
-    #     assert not serializer.is_valid()
-    #     assert field in serializer.errors
-    #
-    # def test_success_register(self, valid_data):
-    #     data = valid_data.copy()
-    #
-    #     serializer = RegisterSerializer(data=data)
-    #
-    #     assert serializer.is_valid()
+    @pytest.mark.parametrize(
+        "field, value",
+        [
+            ("password", "wrong"),
+            ("password", "3214"),
+            ("password", "Aa123456"),
+            ("password", "johndoe3214"),
+        ],
+    )
+    def test_validate_password(self, valid_data, field, value):
+        data = valid_data.copy()
+        data[field] = value
+        data["password_confirm"] = value
+
+        serializer = RegisterSerializer(data=data)
+
+        with pytest.raises(ValidationError):
+            serializer.is_valid()
+
+    def test_success_register(self, valid_data):
+        data = valid_data.copy()
+
+        serializer = RegisterSerializer(data=data)
+
+        assert serializer.is_valid()
 
 
-# @pytest.mark.django_db
-# class TestLoginSerializer:
-# @pytest.mark.parametrize(
-#     "login, password",
-#     [
-#         ("existing", "Strong_Password1234"),
-#         ("existing@example.com", "Strong_Password1234"),
-#     ],
-# )
-# def test_success_login(self, login, password, user):
-#     serializer = LoginSerializer(
-#         data={
-#             "login": login,
-#             "password": password,
-#         }
-#     )
-#
-#     assert serializer.is_valid()
-#
-#     assert "access" in serializer.validated_data
-#     assert "refresh" in serializer.validated_data
-#
-# @pytest.mark.parametrize(
-#     "login, password",
-#     [
-#         ("not_existing", "Strong_Password1234"),
-#         ("not_existing@example.com", "Strong_Password1234"),
-#         ("existing", "Wrong_Password1234"),
-#         ("existing@example.com", "Wrong_Password1234"),
-#     ],
-# )
-# def test_unsuccess_login(self, login, password, user):
-#     serializer = LoginSerializer(
-#         data={
-#             "login": login,
-#             "password": password,
-#         }
-#     )
-#
-#     assert not serializer.is_valid()
-#     assert "non_field_errors" in serializer.errors
-#     assert serializer.errors["non_field_errors"][0] == "Invalid credentials."
+@pytest.mark.django_db
+class TestLoginSerializer:
+    @pytest.mark.parametrize(
+        "login, password",
+        [
+            ("existing", "Strong_Password1234"),
+            ("existing@example.com", "Strong_Password1234"),
+        ],
+    )
+    def test_success_login(self, login, password, user):
+        serializer = LoginSerializer(
+            data={
+                "login": login,
+                "password": password,
+            }
+        )
+
+        assert serializer.is_valid()
+
+        assert "access" in serializer.validated_data
+        assert "refresh" in serializer.validated_data
+
+    @pytest.mark.parametrize(
+        "login, password",
+        [
+            ("not_existing", "Strong_Password1234"),
+            ("not_existing@example.com", "Strong_Password1234"),
+            ("existing", "Wrong_Password1234"),
+            ("existing@example.com", "Wrong_Password1234"),
+        ],
+    )
+    def test_unsuccess_login(self, login, password, user):
+        serializer = LoginSerializer(
+            data={
+                "login": login,
+                "password": password,
+            }
+        )
+
+        with pytest.raises(ValidationError):
+            serializer.is_valid()

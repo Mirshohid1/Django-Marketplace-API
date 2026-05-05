@@ -1,3 +1,6 @@
+import logging
+
+from common.exceptions.base import NotFoundError, ValidationError
 from rest_framework import status
 from rest_framework.authentication import BaseAuthentication
 from rest_framework.generics import CreateAPIView, GenericAPIView, RetrieveUpdateAPIView
@@ -16,6 +19,8 @@ from .serializers import (
 )
 from .service.tasks import create_email_verification, send_email_verification
 
+logger = logging.getLogger(__name__)
+
 
 class RegisterAPIView(CreateAPIView):
     serializer_class = RegisterSerializer
@@ -27,6 +32,7 @@ class RegisterAPIView(CreateAPIView):
         send_email_verification.delay(
             user.email, verification.token, self.request.get_host()
         )
+        logger.info("User registered", extra={"id": user.id, "email": user.email})
 
 
 class LoginAPIView(GenericAPIView):
@@ -36,6 +42,12 @@ class LoginAPIView(GenericAPIView):
     def post(self, request, *args, **kwargs):
         serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
+
+        if request.user.is_authenticated:
+            logger.info(
+                "User authenticated",
+                extra={"id": request.user.id, "email": request.user.email},
+            )
 
         return Response(
             {
@@ -54,6 +66,11 @@ class LogoutAPIView(GenericAPIView):
         serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
         serializer.save()
+        logger.info(
+            "User logged out",
+            extra={"id": request.user.id, "email": request.user.email},
+        )
+
         return Response(status=status.HTTP_204_NO_CONTENT)
 
 
@@ -81,21 +98,23 @@ class VerifyEmailAPIView(APIView):
                 token=token
             )
         except EmailVerification.DoesNotExist:
-            return Response(
-                {"detail": "Invalid token"}, status=status.HTTP_400_BAD_REQUEST
+            logger.exception(
+                "Token verification does not exist", extra={"token": token}
             )
+            raise NotFoundError("Token verification does not exist") from None
 
         if verification.is_expired():
             verification.delete()
-            return Response(
-                {"detail": "Token expired"}, status=status.HTTP_400_BAD_REQUEST
-            )
+            logger.exception("Token expired", extra={"token": token})
+            raise ValidationError("Token expired")
 
         user = verification.user
         user.is_verified = True
         user.save(update_fields=["is_verified"])
 
         verification.delete()
+
+        logger.info("User verified", extra={"id": user.id, "email": user.email})
 
         return Response({"detail": "Email verified"}, status=status.HTTP_200_OK)
 
@@ -121,6 +140,9 @@ class ResendVerificationAPIView(APIView):
             user.email, verification.token, request.get_host()
         )
 
+        logger.info(
+            "Resend verification successful", extra={"id": user.id, "email": user.email}
+        )
         return Response(
             {"detail": "Verification email sent"}, status=status.HTTP_200_OK
         )
