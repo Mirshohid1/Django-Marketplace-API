@@ -1,4 +1,4 @@
-from products.views import CategoryViewSet, ProductViewSet
+from catalog.views import CategoryViewSet, ProductViewSet
 from rest_framework.routers import DefaultRouter
 
 router = DefaultRouter()

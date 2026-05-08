@@ -31,7 +31,7 @@ THIRD_PARTY_APPS = [
     "django_filters",
 ]
 
-LOCAL_APPS = ["api", "common", "users", "products", "notifications"]
+LOCAL_APPS = ["api", "common", "users", "catalog", "notifications"]
 
 INSTALLED_APPS = BASE_APPS + THIRD_PARTY_APPS + LOCAL_APPS
 
