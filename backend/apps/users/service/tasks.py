@@ -1,7 +1,6 @@
 import logging
 
 from celery import shared_task
-from common.exceptions.base import ValidationError
 from django.conf import settings
 from django.core.mail import send_mail
 from django.db import transaction
@@ -20,11 +19,15 @@ def create_email_verification(user):
         verification = EmailVerification.objects.create(user=user)
     except Exception:
         logger.exception("Task create_email_verification failed", extra={"user": user})
-        raise ValidationError("Create email verification token failed") from None
+        raise
     return verification
 
 
-@shared_task
+@shared_task(
+    autoretry_for=(Exception,),
+    retry_backoff=True,
+    retry_kwargs={"max_retries": 5},
+)
 def send_email_verification(user_email, token, domain):
     logger.info(
         "Task send_email_verification started",
@@ -43,10 +46,10 @@ def send_email_verification(user_email, token, domain):
         )
     except Exception:
         logger.exception(
-            "Send email verification failed",
+            "Task send_email_verification failed",
             extra={"user_email": user_email, "domain": domain},
         )
-        raise ValidationError("Task send_email_verification failed") from None
+        raise
     else:
         logger.info(
             "Task send_email_verification successful",
