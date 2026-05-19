@@ -9,4 +9,7 @@ class NotificationViewSet(ModelViewSet):
     serializer_class = NotificationSerializer
 
     def get_queryset(self) -> QuerySet[Notification]:
-        return Notification.objects.filter(user=self.request.user)
+        if self.request.user.is_authenticated or self.request.user.is_superuser:
+            return Notification.objects.filter(user=self.request.user)
+
+        return Notification.objects.none()

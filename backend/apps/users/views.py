@@ -1,6 +1,11 @@
 import logging
 
 from common.exceptions.base import NotFoundError, ValidationError
+from drf_spectacular.utils import (
+    OpenApiParameter,
+    OpenApiTypes,
+    extend_schema,
+)
 from rest_framework import status
 from rest_framework.authentication import BaseAuthentication
 from rest_framework.generics import CreateAPIView, GenericAPIView, RetrieveUpdateAPIView
@@ -86,6 +91,18 @@ class MeAPIView(RetrieveUpdateAPIView):
         return self.request.user
 
 
+@extend_schema(
+    request=None,
+    responses={200: None},
+    parameters=[
+        OpenApiParameter(
+            name="token",
+            type=OpenApiTypes.STR,
+            location=OpenApiParameter.PATH,
+            description="Email verification token",
+        ),
+    ],
+)
 class VerifyEmailAPIView(APIView):
 
     authentication_classes: list[type[BaseAuthentication]] = []
@@ -123,6 +140,10 @@ class ResendThrottle(UserRateThrottle):
     rate = "3/hour"
 
 
+@extend_schema(
+    request=None,
+    responses={200: None},
+)
 class ResendVerificationAPIView(APIView):
     permission_classes = [IsAuthenticated]
     throttle_classes = [ResendThrottle]
