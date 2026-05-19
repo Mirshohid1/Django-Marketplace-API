@@ -1,10 +1,9 @@
-from datetime import timezone
-
 from django.db import models
+from django.utils import timezone
 
 
 class SoftDeleteQuerySet(models.QuerySet):
-    def delete(self):
+    def soft_delete(self):
         return super().update(
             is_deleted=True,
             deleted_at=timezone.now(),
@@ -13,7 +12,7 @@ class SoftDeleteQuerySet(models.QuerySet):
     def alive(self):
         return self.filter(is_deleted=False)
 
-    def dead(self):
+    def deleted(self):
         return self.filter(is_deleted=True)
 
 

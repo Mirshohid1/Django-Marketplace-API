@@ -1,20 +1,15 @@
-from typing import TYPE_CHECKING, cast
+from typing import TYPE_CHECKING
 
+from common.managers import SoftDeleteManager, SoftDeleteQuerySet
 from django.db import models
 
 if TYPE_CHECKING:
     from users.models import User
 
-    from .models import Product
+    from .models.products import Product
 
 
-class ProductQuerySet(models.QuerySet["Product"]):
-
-    def alive(self) -> models.QuerySet["Product"]:
-        return self.filter(is_deleted=False)
-
-    def deleted(self) -> models.QuerySet["Product"]:
-        return self.filter(is_deleted=True)
+class ProductQuerySet(SoftDeleteQuerySet):
 
     def approved(self) -> models.QuerySet["Product"]:
         return self.alive().filter(status=self.model.Status.APPROVED)
@@ -38,19 +33,4 @@ class ProductQuerySet(models.QuerySet["Product"]):
         return self.alive().filter(owner=owner).order_by("-created_at")
 
 
-class ProductManager(models.Manager["Product"]):
-
-    def get_queryset(self) -> models.QuerySet["Product"]:
-        return ProductQuerySet(self.model, using=self._db).alive()
-
-    def for_feed(self) -> models.QuerySet["Product"]:
-        qs = cast(ProductQuerySet, self.get_queryset())
-        return qs.for_feed()
-
-    def approved(self) -> models.QuerySet["Product"]:
-        qs = cast(ProductQuerySet, self.get_queryset())
-        return qs.approved()
-
-    def for_category(self, category_id: int) -> models.QuerySet["Product"]:
-        qs = cast(ProductQuerySet, self.get_queryset())
-        return qs.for_category(category_id)
+ProductManager = SoftDeleteManager.from_queryset(ProductQuerySet)
