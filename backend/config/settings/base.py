@@ -10,10 +10,19 @@ sys.path.insert(0, str(APPS_DIR))
 env = environ.Env(DEBUG=(bool, False))
 env.read_env(BASE_DIR / ".env")
 
-SECRET_KEY = env("SECRET_KEY")
-DEBUG = env("DEBUG")
+SECRET_KEY = env(
+    "SECRET_KEY",
+    default="unsafe-secret-key-for-dev",
+)
+DEBUG = env.bool(
+    "DEBUG",
+    default=False,
+)
 
-ALLOWED_HOSTS = env.list("ALLOWED_HOSTS")
+ALLOWED_HOSTS = env.list(
+    "ALLOWED_HOSTS",
+    default=["localhost", "127.0.0.1"],
+)
 
 BASE_APPS = [
     "django.contrib.admin",
@@ -56,8 +65,14 @@ CACHES = {
     }
 }
 
-CELERY_BROKER_URL = env("CELERY_BROKER_URL")
-CELERY_RESULT_BACKEND = env("CELERY_RESULT_BACKEND")
+CELERY_BROKER_URL = env(
+    "CELERY_BROKER_URL",
+    default="redis://localhost:6379/0",
+)
+CELERY_RESULT_BACKEND = env(
+    "CELERY_RESULT_BACKEND",
+    default="redis://localhost:6379/0",
+)
 
 CELERY_ACCEPT_CONTENT = ["json"]
 CELERY_TASK_SERIALIZER = "json"
@@ -91,11 +106,17 @@ WSGI_APPLICATION = "config.wsgi.application"
 DATABASES = {
     "default": {
         "ENGINE": "django.db.backends.postgresql",
-        "NAME": env("DB_NAME"),
-        "USER": env("DB_USER"),
-        "PASSWORD": env("DB_PASSWORD"),
-        "HOST": env("DB_HOST"),
-        "PORT": env("DB_PORT"),
+        "NAME": env(
+            "DB_NAME",
+            default="marketplaceapi_db",
+        ),
+        "USER": env("DB_USER", default="postgres"),
+        "PASSWORD": env("DB_PASSWORD", default="postgres"),
+        "HOST": env(
+            "DB_HOST",
+            default="localhost",
+        ),
+        "PORT": env("DB_PORT", default=5432),
     }
 }
 
@@ -184,12 +205,27 @@ SPECTACULAR_SETTINGS = {
 
 EMAIL_BACKEND = "django.core.mail.backends.smtp.EmailBackend"
 
-EMAIL_HOST = env("EMAIL_HOST")
-EMAIL_PORT = env("EMAIL_PORT")
-EMAIL_USE_TLS = env("EMAIL_USE_TLS")
+EMAIL_HOST = env(
+    "EMAIL_HOST",
+    default="smtp.gmail.com",
+)
+EMAIL_PORT = env.int(
+    "EMAIL_PORT",
+    default=587,
+)
+EMAIL_USE_TLS = env.bool(
+    "EMAIL_USE_TLS",
+    default=True,
+)
 
-EMAIL_HOST_USER = env("EMAIL_HOST_USER")
-EMAIL_HOST_PASSWORD = env("EMAIL_HOST_PASSWORD")
+EMAIL_HOST_USER = env(
+    "EMAIL_HOST_USER",
+    default="",
+)
+EMAIL_HOST_PASSWORD = env(
+    "EMAIL_HOST_PASSWORD",
+    default="",
+)
 
 DEFAULT_FROM_EMAIL = EMAIL_HOST_USER
 
