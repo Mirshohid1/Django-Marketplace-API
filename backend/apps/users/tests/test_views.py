@@ -143,7 +143,7 @@ class TestMeAPIView:
         response = api_client.get(url)
 
         assert response.status_code == 200
-        assert response.data["id"] == user.id
+        assert response.data["id"] == str(user.id)
         assert response.data["email"] == user.email
         assert "password" not in response.data
 
