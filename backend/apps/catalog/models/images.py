@@ -16,7 +16,7 @@ class ProductImage(BaseModel, SoftDeleteModel):
 
 
 class ProductVariantImage(BaseModel, SoftDeleteModel):
-    product_variant = models.ForeignKey(
+    variant = models.ForeignKey(
         ProductVariant, on_delete=models.PROTECT, related_name="images"
     )
     image = models.ImageField(upload_to=product_variant_upload_path)
