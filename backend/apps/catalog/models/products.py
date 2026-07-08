@@ -1,5 +1,6 @@
 from typing import Any
 
+from common.managers import SoftDeleteManager
 from common.models import BaseModel, SoftDeleteModel
 from django.core.exceptions import ValidationError
 from django.db import models
@@ -7,7 +8,7 @@ from django.db.models import Q
 from django.utils.text import slugify
 from users.models import User
 
-from ..managers import ProductManager
+from ..managers import ProductQuerySet
 from .catalogs import Brand, Category
 
 
@@ -20,7 +21,7 @@ class Product(BaseModel, SoftDeleteModel):
         REJECTED = "rejected"
         ARCHIVED = "archived"
 
-    owner = models.ForeignKey(User, on_delete=models.CASCADE, related_name="products")
+    owner = models.ForeignKey(User, on_delete=models.PROTECT, related_name="products")
 
     category = models.ForeignKey(
         Category, on_delete=models.PROTECT, related_name="products"
@@ -36,7 +37,7 @@ class Product(BaseModel, SoftDeleteModel):
         choices=Status.choices, default=Status.DRAFT, max_length=10
     )
 
-    objects = ProductManager()
+    objects = SoftDeleteManager.from_queryset(ProductQuerySet)  # type: ignore
 
     def is_editable(self) -> bool:
         return not self.is_deleted and self.status in {

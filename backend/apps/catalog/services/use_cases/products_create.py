@@ -61,7 +61,7 @@ class ProductCreateService:
         attributes_data: list[dict],
         images_data: list[dict] | None = None,
     ) -> Product:
-        product = Product.objects.create(**product_data)
+        product = Product.objects.create(**product_data)  # type: ignore
 
         if images_data:
             images = [

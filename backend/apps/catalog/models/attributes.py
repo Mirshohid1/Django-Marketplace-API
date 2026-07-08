@@ -1,7 +1,7 @@
 from common.models import BaseModel, SoftDeleteModel
 from django.db import models
 
-from .products import ProductVariant
+from .products import Product, ProductVariant
 
 
 class AttributeType(models.TextChoices):
@@ -38,6 +38,10 @@ class AttributeValue(BaseModel, SoftDeleteModel):
     )
 
     value = models.CharField(max_length=255)
+
+    product = models.ForeignKey(
+        Product, on_delete=models.PROTECT, related_name="attribute_values"
+    )
 
     class Meta:
         db_table = "attribute_values"
