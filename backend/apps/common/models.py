@@ -1,7 +1,7 @@
 import uuid
-from datetime import timezone
 
 from django.db import models
+from django.utils import timezone
 
 from .managers import SoftDeleteManager
 
@@ -23,7 +23,7 @@ class TimeStampedModel(models.Model):
 
 class SoftDeleteModel(models.Model):
     is_deleted = models.BooleanField(default=False)
-    deleted_at = models.DateTimeField(null=True, blank=True)
+    deleted_at = models.DateTimeField(blank=True, null=True)
 
     objects = SoftDeleteManager()
     all_objects = models.Manager()

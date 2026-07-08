@@ -1,3 +1,4 @@
+import uuid
 from typing import TYPE_CHECKING
 
 from common.managers import SoftDeleteManager, SoftDeleteQuerySet
@@ -26,7 +27,7 @@ class ProductQuerySet(SoftDeleteQuerySet):
     def for_feed(self) -> models.QuerySet["Product"]:
         return self.approved().order_by("-created_at")
 
-    def for_category(self, category_id: int) -> models.QuerySet["Product"]:
+    def for_category(self, category_id: uuid.UUID) -> models.QuerySet["Product"]:
         return self.approved().filter(category_id=category_id)
 
     def for_owner(self, owner: "User") -> models.QuerySet["Product"]:
