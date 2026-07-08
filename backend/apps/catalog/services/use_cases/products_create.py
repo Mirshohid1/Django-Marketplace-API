@@ -1,13 +1,14 @@
 from django.db import transaction
 
-from ..models.attributes import (
+from catalog.models.attributes import (
+    AttributeValue,
     VariantAttributeValue,
 )
-from ..models.images import (
+from catalog.models.images import (
     ProductImage,
     ProductVariantImage,
 )
-from ..models.products import (
+from catalog.models.products import (
     Product,
     ProductVariant,
 )
@@ -57,6 +58,7 @@ class ProductCreateService:
         *,
         product_data: dict,
         variants_data: list[dict],
+        attributes_data: list[dict],
         images_data: list[dict] | None = None,
     ) -> Product:
         product = Product.objects.create(**product_data)
@@ -70,6 +72,13 @@ class ProductCreateService:
                 for image_data in images_data
             ]
             ProductImage.objects.bulk_create(images)
+
+        attribute_values = [
+            AttributeValue(product=product, **attribute_data)
+            for attribute_data in attributes_data
+        ]
+
+        AttributeValue.objects.bulk_create(attribute_values)
 
         for variant_data in variants_data:
             ProductVariantCreateService.execute(
